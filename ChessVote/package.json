@@ -1,0 +1,11 @@
+{
+  "version": "1.0.0",
+  "name": "chess-vote",
+  "scripts": {
+    "npm-install": "npm i",
+    "fomantic-build": "cd node_modules/fomantic-ui && npx gulp install && npx gulp build"
+  },
+  "devDependencies": {
+    "fomantic-ui": "2.8.8"
+  }
+}
