@@ -1,0 +1,35 @@
+﻿@model dynamic
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VoteChess</title>
+    <link rel="stylesheet" href="fomantic/semantic.min.css" />
+
+    <script src="fomantic/semantic.min.js"></script>
+    <script src="site/script.js"></script>
+</head>
+<body style="background-color: #d2d6de">
+<div class="ui middle aligned center aligned grid" style="height: 100%">
+    <div class="column" style="max-width: 300px;">
+        <form class="ui form" method="post">
+            <div class="ui stacked raised padded blue segment" style="padding-top: 2.5em; padding-bottom: 2em">
+                <h2 class="ui center aligned icon header" style="font-variant: small-caps">
+                    <i class="circular chess icon"></i>
+                    VoteChess
+                </h2>
+                <div class="ui hidden divider"></div>
+                <div class="ui hidden divider"></div>
+                <button class="ui submit button"><i class="chess knight icon"></i>Войти через Lichess</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

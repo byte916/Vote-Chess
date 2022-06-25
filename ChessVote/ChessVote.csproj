@@ -10,4 +10,7 @@
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="AspNet.Security.OAuth.Lichess" Version="6.0.6" />
+  </ItemGroup>
 </Project>

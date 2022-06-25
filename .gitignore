@@ -1,3 +1,8 @@
 .vs/
 ChessVote/obj/
 ChessVote/bin/
+*.user
+ChessVote/node_modules/
+package-lock.json
+ChessVote/semantic/
+ChessVote/wwwroot/fomantic/
