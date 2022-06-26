@@ -20,5 +20,11 @@ namespace ChessVote.Controllers
         {
             return Challenge(new AuthenticationProperties { RedirectUri = ReturnUrl }, LichessAuthenticationDefaults.AuthenticationScheme);
         }
+
+        public async Task<IActionResult> LogOut()
+        {
+            await HttpContext.SignOutAsync();
+            return Redirect("/");
+        }
     }
 }

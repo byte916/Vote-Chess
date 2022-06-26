@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using ChessVote.CvDb;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +20,9 @@ builder.Services.AddAuthentication(options =>
         options.ClientId = "vote_chess";
         options.ClientSecret = "lip_WQQ5VYSSu4GPlW736D3S";
     });
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<CvDbContext>(options => options.UseSqlServer(connectionString));
 
 // Включаем работу контроллеров и views
 builder.Services.AddControllersWithViews(options =>
