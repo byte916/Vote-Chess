@@ -6,3 +6,6 @@ ChessVote/node_modules/
 package-lock.json
 ChessVote/semantic/
 ChessVote/wwwroot/fomantic/
+ChessVote/scripts/*.js
+ChessVote/scripts/*.js.map
+ChessVote/wwwroot/site/

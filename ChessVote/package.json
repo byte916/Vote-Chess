@@ -2,10 +2,23 @@
   "version": "1.0.0",
   "name": "chess-vote",
   "scripts": {
-    "npm-install": "npm i",
-    "fomantic-build": "cd node_modules/fomantic-ui && npx gulp install && npx gulp build"
+    "npm-install": "npm install",
+    "fomantic-build": "cd node_modules/fomantic-ui && npx gulp install && npx gulp build",
+    "webpack-script-dev": "webpack --mode development --env development",
+    "webpack-script-prod": "webpack --mode production --env production"
   },
   "devDependencies": {
-    "fomantic-ui": "2.8.8"
+    "clean-webpack-plugin": "^4.0.0",
+    "css-loader": "^6.7.1",
+    "fomantic-ui": "2.8.8",
+    "less": "^4.1.2",
+    "less-loader": "^9.1.0",
+    "mini-css-extract-plugin": "^2.6.0",
+    "optimize-css-assets-webpack-plugin": "^6.0.1",
+    "terser-webpack-plugin": "^5.3.1",
+    "ts-loader": "^9.2.8",
+    "typescript": "^4.6.2",
+    "webpack": "^5.70.0",
+    "webpack-cli": "^4.9.2"
   }
 }
