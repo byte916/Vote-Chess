@@ -19,7 +19,8 @@
             // Точка входа в приложение
             entry: {
                 site: [
-                    "./scripts/main.ts",
+                    "./node_modules/toastr/build/toastr.min.css",
+                    "./scripts/main.ts"
                 ]
             },
 

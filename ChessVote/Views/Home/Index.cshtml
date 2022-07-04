@@ -11,12 +11,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VoteChess</title>
     <link rel="stylesheet" href="fomantic/semantic.min.css" />
+    <link rel="stylesheet" href="site.css" />
 
-    <script src="fomantic/semantic.min.js"></script>
+    @*<script src="fomantic/semantic.min.js"></script>*@
     <script src="site/script.js"></script>
     <style>
         .ui.inverted.basic.button.cv-white-background {
             color: rgba(0, 0, 0, .6);
+        }
+        
+        .ui.inverted.basic.button.cv-white-background:hover
+        {
+             color: #1b1c1d !important;
         }
     </style>
 </head>
@@ -48,7 +54,7 @@
                     byte916
                 </td>
                 <td>
-                    <button class="ui compact inverted cv-white-background green basic button">Присоединиться</button>
+                    <button class="ui compact inverted cv-white-background grey basic button">Присоединиться</button>
                 </td>
             </tr>
             <tr>
@@ -56,14 +62,24 @@
                     byte916
                 </td>
                 <td>
-                    <button class="ui compact inverted cv-white-background green basic button">Присоединиться</button>
+                    <button class="ui compact inverted cv-white-background grey basic button">Присоединиться</button>
                 </td>
             </tr>
             </tbody>
         </table>
         <br/>
-        <button class="ui basic inverted cv-white-background green basic button">Создать игру</button>
+        <button id="btn_create_game" class="ui basic inverted cv-white-background grey basic button">Создать игру</button>
     </div>
+</div>
+<div id="game" class="ui vertical basic padded segment">
+    <span id="moves">Ходы</span>
+    <span id="vote_counter">Проголосовало: </span>
+    <button id="finish_vote">Закончить голосование</button>
+    <button class="move" data-value="1">Сделать ход 1</button>
+    <button class="move" data-value="2">Сделать ход 2</button>
+    <button class="move" data-value="3">Сделать ход 3</button>
+    <button class="move" data-value="4">Сделать ход 4</button>
+    <button class="exit">Выйти</button>
 </div>
 </body>
 </html>
