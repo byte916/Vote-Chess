@@ -9,5 +9,8 @@
         public string CreatorName { get; set; }
 
         public User Creator { get; set; }
+
+        /// <summary> Игра в процессе </summary>
+        public bool IsInProgress { get; set; }
     }
 }
