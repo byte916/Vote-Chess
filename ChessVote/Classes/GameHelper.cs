@@ -16,7 +16,12 @@ namespace ChessVote.Classes
             return currentGame == null ? 0 : 1;
         }
 
-        public void CreateGame(string name)
+        public List<string> GetGameList()
+        {
+            return _db.Games.Where(g => g.IsInProgress).Select(g => g.CreatorName).ToList();
+        }
+
+        public void Create(string name)
         {
             var currentGame = _db.Games.FirstOrDefault(g => g.CreatorName == name && g.IsInProgress);
             if (currentGame != null)
@@ -30,6 +35,17 @@ namespace ChessVote.Classes
                 IsInProgress = true,
             };
             _db.Games.Add(currentGame);
+            _db.SaveChanges();
+        }
+
+        public void Exit(string name)
+        {
+            var currentGame = _db.Games.FirstOrDefault(g => g.CreatorName == name && g.IsInProgress);
+            if (currentGame == null)
+            {
+                return;
+            }
+            currentGame.IsInProgress = false;
             _db.SaveChanges();
         }
     }

@@ -1,4 +1,7 @@
 ﻿import { ready, send } from './common'
+import { runGetGameList, stopGetGameList } from './game-list'
+
+
 ready(() => {
     getState();
     // Нажатие на кнопку "Создать новую игру"
@@ -9,7 +12,16 @@ ready(() => {
             onSuccess: onGameCreated
         });
     });
+
+    document.getElementById("exit").addEventListener('click', () => {
+        send({
+            method: "GET",
+            url: "game/exit",
+            onSuccess: onGameExit
+        });
+    });
 });
+
 /**Получить состояние */
 function getState() {
     send({
@@ -21,6 +33,7 @@ function getState() {
                     // Не в игре
                     document.getElementById("main-screen").style.display = "";
                     document.getElementById("game").style.display = "none";
+                    runGetGameList();
                     break;
                 case 1:
                     // В игре
@@ -34,6 +47,13 @@ function getState() {
 
 /**После нажатия на кнопку Создать новую игру */
 function onGameCreated() {
+    stopGetGameList();
     document.getElementById("main-screen").style.display = "none";
     document.getElementById("game").style.display = "";
+}
+
+function onGameExit() {
+    document.getElementById("main-screen").style.display = "";
+    document.getElementById("game").style.display = "none";
+    runGetGameList();
 }

@@ -24,6 +24,13 @@
         {
              color: #1b1c1d !important;
         }
+
+        #game-list {
+            display: inline-block
+        }
+        #game-list td {
+            font-size: 1.1em; padding-left: 1.2em;
+        }
     </style>
 </head>
 <body>
@@ -47,24 +54,8 @@
 </div>
 <div id="main-screen" class="ui vertical basic padded segment">
     <div class="ui center aligned container" style="padding-top: 80px;">
-        <table style="display: inline-block" class="ui collapsing table">
+        <table id="game-list" class="ui collapsing table">
             <tbody>
-            <tr>
-                <td style="font-size: 1.1em; padding-left: 1.2em;">
-                    byte916
-                </td>
-                <td>
-                    <button class="ui compact inverted cv-white-background grey basic button">Присоединиться</button>
-                </td>
-            </tr>
-            <tr>
-                <td style="font-size: 1.1em; padding-left: 1.2em;">
-                    byte916
-                </td>
-                <td>
-                    <button class="ui compact inverted cv-white-background grey basic button">Присоединиться</button>
-                </td>
-            </tr>
             </tbody>
         </table>
         <br/>
@@ -79,7 +70,7 @@
     <button class="move" data-value="2">Сделать ход 2</button>
     <button class="move" data-value="3">Сделать ход 3</button>
     <button class="move" data-value="4">Сделать ход 4</button>
-    <button class="exit">Выйти</button>
+    <button id="exit">Выйти</button>
 </div>
 </body>
 </html>
