@@ -12,5 +12,8 @@
 
         /// <summary> Игра в процессе </summary>
         public bool IsInProgress { get; set; }
+
+        /// <summary> Список участников игры </summary>
+        public List<User> Participants { get; set; }
     }
 }
