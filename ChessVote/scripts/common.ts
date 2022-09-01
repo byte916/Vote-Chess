@@ -1,5 +1,4 @@
-﻿
-import * as toastr from "toastr"
+﻿import * as toastr from "toastr"
 
 export function ready(fn) {
     if (document.readyState != 'loading') {
@@ -9,6 +8,10 @@ export function ready(fn) {
     }
 }
 
+/**
+ * Сделать http-запрос
+ * @param data
+ */
 export function send(data: {
     method: string,
     url: string,
@@ -24,7 +27,7 @@ export function send(data: {
             data.onSuccess(this.response);
         } else {
             if (data.onError == null) {
-                toastr.warning("Произошла ошибка");
+                toastr.warning("Произошла ошибка (код ошибки 2)");
                 return;
             }
             data.onError();
@@ -34,7 +37,7 @@ export function send(data: {
 
     request.onerror = function () {
         if (data.onError == null) {
-            toastr.warning("Произошла ошибка");
+            toastr.warning("Произошла ошибка (код ошибки 3)");
             return;
         }
         data.onError();

@@ -1,6 +1,7 @@
 ﻿import { ready, send } from './common'
 import { runGetGameList, stopGetGameList } from './game-list'
-
+import { joinGame } from './game';
+// Код последней ошибки 3
 
 ready(() => {
     getState();
@@ -13,12 +14,15 @@ ready(() => {
         });
     });
 
-    document.getElementById("exit").addEventListener('click', () => {
-        send({
-            method: "GET",
-            url: "game/exit",
-            onSuccess: onGameExit
-        });
+    document.querySelectorAll(".exit").forEach(element => {
+        element.addEventListener('click',
+            () => {
+                send({
+                    method: "GET",
+                    url: "game/exit",
+                    onSuccess: onGameExit
+                });
+            });
     });
 });
 
@@ -31,14 +35,16 @@ function getState() {
             switch (data.state) {
                 case 0:
                     // Не в игре
-                    document.getElementById("main-screen").style.display = "";
-                    document.getElementById("game").style.display = "none";
+                    hideAllScreens("main-screen");
                     runGetGameList();
                     break;
                 case 1:
-                    // В игре
-                    document.getElementById("main-screen").style.display = "none";
-                    document.getElementById("game").style.display = "";
+                    // В собственной игре
+                    hideAllScreens("game-master");
+                    break;
+                case 2:
+                    // Присоединённый к игре
+                    hideAllScreens("game-slave");
                     break;
             }
         }
@@ -47,13 +53,28 @@ function getState() {
 
 /**После нажатия на кнопку Создать новую игру */
 function onGameCreated() {
+    hideAllScreens("game-master");
     stopGetGameList();
-    document.getElementById("main-screen").style.display = "none";
-    document.getElementById("game").style.display = "";
 }
 
 function onGameExit() {
-    document.getElementById("main-screen").style.display = "";
-    document.getElementById("game").style.display = "none";
+    hideAllScreens("main-screen");
     runGetGameList();
+}
+
+export function onJoinToGame(name: string) {
+    joinGame(name);
+    stopGetGameList();
+}
+
+/**
+ * Скрыть все блоки
+ * @param except блок, который останется видимым
+ */
+export function hideAllScreens(except: string) {
+    document.getElementById("main-screen").style.display = "none";
+    document.getElementById("game-master").style.display = "none";
+    document.getElementById("game-slave").style.display = "none";
+
+    document.getElementById(except).style.display = "";
 }

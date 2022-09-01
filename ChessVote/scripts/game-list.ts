@@ -1,4 +1,5 @@
 ﻿import { send } from './common'
+import { onJoinToGame } from './main';
 
 /**Таймер получения списка игр */
 var getGameListTimer = null;
@@ -12,6 +13,7 @@ export function runGetGameList() {
     games.length = 0;
     games = [];
     getGameList();
+    // Каждую секунду получаем список игр
     getGameListTimer = setInterval(getGameList, 1000);
 }
 
@@ -44,8 +46,8 @@ function getGameList() {
 }
 
 /**
- * Добавить строку 
- * @param name
+ * Добавить строку с игрок
+ * @param name Название игрока, создавшего игру
  * @param tableBody
  */
 function createGameListRow(name: string, tableBody: HTMLTableElement) {
@@ -56,7 +58,7 @@ function createGameListRow(name: string, tableBody: HTMLTableElement) {
     row.appendChild(nameCell);
     var buttonCell = document.createElement("td");
     var button = document.createElement("a");
-    button.href = "";
+    button.onclick = () => { onJoinToGame(name); };
     button.classList.add("ui", "compact", "inverted", "cv-white-background", "grey", "basic", "button");
     button.innerText = "Присоединиться";
     buttonCell.appendChild(button);

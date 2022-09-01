@@ -15,7 +15,9 @@ namespace ChessVote.CvDb
 
             modelBuilder.Entity<Game>().HasKey(g => g.Id);
             modelBuilder.Entity<Game>().HasOne(g => g.Creator).WithMany().HasForeignKey(g => g.CreatorName);
-            modelBuilder.Entity<Game>().HasMany(g => g.Participants).WithOne(u => u.Game).HasForeignKey(u => u.GameId)
+            modelBuilder.Entity<Game>().HasMany(g => g.Participants)
+                .WithOne(u => u.Game)
+                .HasForeignKey(u => u.GameId)
                 .IsRequired(false);
 
             base.OnModelCreating(modelBuilder);

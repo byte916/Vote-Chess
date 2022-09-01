@@ -35,7 +35,16 @@ namespace ChessVote.Controllers
             new GameHelper(_db).Create(userName);
             return new StatusCodeResult(200);
         }
-        
+
+        public ActionResult Join(string id)
+        {
+            var userName = new UserHelper(HttpContext, _db).GetUser.Name;
+            if (new GameHelper(_db).Join(id, userName))
+            {
+                return new StatusCodeResult(200);
+            }
+            return new StatusCodeResult(500);
+        }
 
         public ActionResult Exit()
         {
