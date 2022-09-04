@@ -13,16 +13,6 @@ namespace ChessVote.Controllers
             _db = context;
         }
 
-        public JsonResult GetState()
-        {
-            var userName = new UserHelper(HttpContext, _db).GetUser.Name;
-            var state = new GameHelper(_db).GetState(userName);
-            return new JsonResult(new
-            {
-                state = state
-            });
-        }
-
         /// <summary> Получить список игр </summary>
         public JsonResult GetGameList()
         {

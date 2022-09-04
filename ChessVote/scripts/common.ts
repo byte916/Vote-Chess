@@ -1,6 +1,10 @@
 ﻿import * as toastr from "toastr"
 
-export function ready(fn) {
+/**
+ * Выполнить указанную функцию после загрузки страницы
+ * @param fn
+ */
+export function documentReady(fn) {
     if (document.readyState != 'loading') {
         fn();
     } else {
@@ -9,7 +13,7 @@ export function ready(fn) {
 }
 
 /**
- * Сделать http-запрос
+ * Выполнить http-запрос
  * @param data
  */
 export function send(data: {
@@ -44,6 +48,4 @@ export function send(data: {
     };
 
     request.send();
-
-
 }
