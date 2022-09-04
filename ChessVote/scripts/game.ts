@@ -8,11 +8,15 @@ export class Game {
 
     /**Присоединиться к игре */
     public static join() {
+        if (Game.getGameStatTimer != null) return;
         Game.getGameStatTimer = setInterval(Game.getGameState, 1000);
     }
 
     public static exit() {
-        if (Game.getGameStatTimer != null) clearInterval(Game.getGameStatTimer);
+        if (Game.getGameStatTimer != null) {
+            clearInterval(Game.getGameStatTimer);
+            Game.getGameStatTimer = null;
+        }
     }
 
     public static getGameState() {

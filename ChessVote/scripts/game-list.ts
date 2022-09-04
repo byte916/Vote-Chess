@@ -12,6 +12,7 @@ export class GameList {
 
     /**Запустить механизм получения списка игр */
     public static runUpdate() {
+        if (GameList.getGameListTimer != null) return;
         var table = document.querySelector("#main-screen table tbody") as HTMLTableElement;
         table.innerHTML = "";
         GameList.games.length = 0;
@@ -23,7 +24,10 @@ export class GameList {
     }
 
     public static stopUpdate() {
-        if (GameList.getGameListTimer != null) clearInterval(GameList.getGameListTimer);
+        if (GameList.getGameListTimer != null) {
+            clearInterval(GameList.getGameListTimer);
+            GameList.getGameListTimer = null;
+        }
     }
 
     private getGameList() {
