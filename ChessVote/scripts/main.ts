@@ -1,7 +1,8 @@
 ﻿import { documentReady, send } from './common'
 import { GameList } from './game-list'
-import { joinGame } from './game';
+import { Game } from './game';
 import { environment } from './environment';
+import * as toastr from "toastr"
 // Код последней ошибки 3
 /**Состояние игры после загрузки страницы */
 declare var state: number;
@@ -12,7 +13,7 @@ documentReady(() => {
     case 0:
         // Не в игре
         SwitchScreen.toMain();
-        GameList.run();
+        GameList.runUpdate();
         break;
     case 1:
         // В собственной игре
@@ -27,9 +28,7 @@ documentReady(() => {
     document.getElementById('btn_create_game').addEventListener('click', onGameCreateClick);
 
     document.querySelectorAll(".exit").forEach(element => {
-        element.addEventListener('click',
-            () => {
-            });
+        element.addEventListener('click', onGameExitClick);
     });
 });
 
@@ -40,7 +39,7 @@ function onGameCreateClick() {
         url: environment.game.create,
         onSuccess: () => {
             SwitchScreen.toMasterGame();
-            GameList.stop();
+            GameList.stopUpdate();
         }
     });
 }
@@ -52,30 +51,40 @@ export function onGameExitClick() {
         url: environment.game.exit,
         onSuccess: () => {
             SwitchScreen.toMain();
-            GameList.run();
+            GameList.runUpdate();
         }
     });
 }
 
-export function onJoinToGame(name: string) {
-    joinGame(name);
-    GameList.stop();
+export function onJoinToGameClick(name: string) {
+    send({
+        method: "get",
+        url: environment.game.join + "?id=" + name,
+        onSuccess: () => {
+            SwitchScreen.toSlaveGame();
+            GameList.stopUpdate();
+            Game.join();
+        },
+        onError: () => {
+            toastr.warning("Произошла ошибка (код ошибки 1)");
+        }
+    });
 }
 
 
 export class SwitchScreen {
     public static toMain() {
-        this.hideScreens();
+        SwitchScreen.hideScreens();
         document.getElementById("main-screen").style.display = "";
     }
 
     public static toMasterGame() {
-        this.hideScreens();
+        SwitchScreen.hideScreens();
         document.getElementById("game-master").style.display = "";
     }
 
     public static toSlaveGame() {
-        this.hideScreens();
+        SwitchScreen.hideScreens();
         document.getElementById("game-slave").style.display = "";
 
     }

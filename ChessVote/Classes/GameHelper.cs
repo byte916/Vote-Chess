@@ -1,4 +1,6 @@
 ﻿using ChessVote.CvDb;
+using ChessVote.Enums;
+using ChessVote.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChessVote.Classes
@@ -16,13 +18,38 @@ namespace ChessVote.Classes
         /// </summary>
         /// <param name="name">Имя текущего пользователя</param>
         /// <returns></returns>
-        public int GetState(string name)
+        public GameStatus GetState(string name)
         {
             var currentGame = _db.Games.FirstOrDefault(g => g.CreatorName == name && g.IsInProgress);
-            if (currentGame != null) return 1;
+            if (currentGame != null) return GameStatus.Owner;
             var currentUser = _db.Users.Include(u=>u.Game).FirstOrDefault(u => u.Name == name);
-            if (currentUser != null && currentUser.GameId != null && currentUser.Game.IsInProgress) return 2;
-            return 0;
+            if (currentUser != null && currentUser.GameId != null && currentUser.Game.IsInProgress) return GameStatus.Joined;
+            return GameStatus.None;
+        }
+
+        /// <summary> Получить информацию об игре </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public CheckModel CheckGame(string name)
+        {
+            var result = new CheckModel();
+
+            var currentGame = _db.Games.FirstOrDefault(g => g.CreatorName == name && g.IsInProgress);
+            if (currentGame != null) result.status = GameStatus.Owner;
+            else
+            {
+                var currentUser = _db.Users.Include(u => u.Game).FirstOrDefault(u => u.Name == name);
+                if (currentUser != null && currentUser.GameId != null && currentUser.Game.IsInProgress)
+                {
+                    result.status = GameStatus.Joined;
+                }
+                else
+                {
+                    result.status = GameStatus.None;
+                }
+            }
+
+            return result;
         }
 
         public List<string> GetGameList()

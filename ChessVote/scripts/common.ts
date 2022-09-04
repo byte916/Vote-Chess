@@ -35,7 +35,6 @@ export function send(data: {
                 return;
             }
             data.onError();
-
         }
     };
 

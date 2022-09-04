@@ -24,7 +24,8 @@ namespace ChessVote.Controllers
         /// <returns></returns>
         public JsonResult Check()
         {
-            return new JsonResult(true);
+            var userName = new UserHelper(HttpContext, _db).GetUser.Name;
+            return new JsonResult(new GameHelper(_db).CheckGame(userName));
         }
 
         public ActionResult Join(string id)

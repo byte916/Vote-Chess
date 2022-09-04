@@ -1,5 +1,5 @@
 ﻿import { send } from './common'
-import { onJoinToGame } from './main';
+import { onJoinToGameClick } from './main';
 import { environment } from './environment'
 
 /**Управление списком игроков */
@@ -11,19 +11,19 @@ export class GameList {
     static games: string[] = [];
 
     /**Запустить механизм получения списка игр */
-    public static run() {
+    public static runUpdate() {
         var table = document.querySelector("#main-screen table tbody") as HTMLTableElement;
         table.innerHTML = "";
-        this.games.length = 0;
-        this.games = [];
+        GameList.games.length = 0;
+        GameList.games = [];
         // Каждую секунду получаем список игр
-        this.getGameListTimer = setInterval(() => {
+        GameList.getGameListTimer = setInterval(() => {
             new GameList().getGameList();
         }, 1000);
     }
 
-    public static stop() {
-        if (this.getGameListTimer != null) clearInterval(this.getGameListTimer);
+    public static stopUpdate() {
+        if (GameList.getGameListTimer != null) clearInterval(GameList.getGameListTimer);
     }
 
     private getGameList() {
@@ -64,7 +64,7 @@ export class GameList {
         row.appendChild(nameCell);
         var buttonCell = document.createElement("td");
         var button = document.createElement("a");
-        button.onclick = () => { onJoinToGame(name); };
+        button.onclick = () => { onJoinToGameClick(name); };
         button.classList.add("ui", "compact", "inverted", "cv-white-background", "grey", "basic", "button");
         button.innerText = "Присоединиться";
         buttonCell.appendChild(button);
