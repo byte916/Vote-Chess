@@ -1,6 +1,7 @@
 ﻿import { documentReady, send } from './common'
-import { runGetGameList, stopGetGameList } from './game-list'
+import { GameList } from './game-list'
 import { joinGame } from './game';
+import { environment } from './environment';
 // Код последней ошибки 3
 /**Состояние игры после загрузки страницы */
 declare var state: number;
@@ -11,7 +12,7 @@ documentReady(() => {
     case 0:
         // Не в игре
         SwitchScreen.toMain();
-        runGetGameList();
+        GameList.run();
         break;
     case 1:
         // В собственной игре
@@ -23,41 +24,42 @@ documentReady(() => {
         break;
     }
     // Нажатие на кнопку "Создать новую игру"
-    document.getElementById('btn_create_game').addEventListener('click', () => {
-        send({
-            method: "GET",
-            url: "game/create",
-            onSuccess: onGameCreated
-        });
-    });
+    document.getElementById('btn_create_game').addEventListener('click', onGameCreateClick);
 
     document.querySelectorAll(".exit").forEach(element => {
         element.addEventListener('click',
             () => {
-                send({
-                    method: "GET",
-                    url: "game/exit",
-                    onSuccess: onGameExit
-                });
             });
     });
 });
 
-/**После нажатия на кнопку Создать новую игру */
-function onGameCreated() {
-    SwitchScreen.toMasterGame();
-    stopGetGameList();
+/**Нажатие на кнопку Создать новую игру */
+function onGameCreateClick() {
+    send({
+        method: "GET",
+        url: environment.game.create,
+        onSuccess: () => {
+            SwitchScreen.toMasterGame();
+            GameList.stop();
+        }
+    });
 }
 
 /**Выйти из игры */
-export function onGameExit() {
-    SwitchScreen.toMain();
-    runGetGameList();
+export function onGameExitClick() {
+    send({
+        method: "GET",
+        url: environment.game.exit,
+        onSuccess: () => {
+            SwitchScreen.toMain();
+            GameList.run();
+        }
+    });
 }
 
 export function onJoinToGame(name: string) {
     joinGame(name);
-    stopGetGameList();
+    GameList.stop();
 }
 
 

@@ -12,18 +12,19 @@ namespace ChessVote.Controllers
         {
             _db = context;
         }
-
-        /// <summary> Получить список игр </summary>
-        public JsonResult GetGameList()
-        {
-            return new JsonResult(new GameHelper(_db).GetGameList());
-        }
-
+        
         public ActionResult Create()
         {
             var userName = new UserHelper(HttpContext, _db).GetUser.Name;
             new GameHelper(_db).Create(userName);
             return new StatusCodeResult(200);
+        }
+
+        /// <summary> Получить данные по игре </summary>
+        /// <returns></returns>
+        public JsonResult Check()
+        {
+            return new JsonResult(true);
         }
 
         public ActionResult Join(string id)

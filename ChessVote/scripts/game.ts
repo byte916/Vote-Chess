@@ -1,13 +1,14 @@
 ﻿import { send } from './common'
-import { SwitchScreen, onGameExit } from './main'
+import { SwitchScreen } from './main'
 import * as toastr from "toastr"
+import { environment } from './environment'
 
 var getGameStatTimer = null;
 
 export function joinGame(name: string) {
     send({
         method: "get",
-        url: "game/join?id=" + name,
+        url: environment.game.join + "?id=" + name,
         onSuccess: () => {
             SwitchScreen.toSlaveGame();
             getGameStatTimer = setInterval(getGameState, 1000);
@@ -22,12 +23,7 @@ export function joinGame(name: string) {
 function getGameState() {
     send({
         method: "GET",
-        url: "game/getstate",
-        onSuccess: (data: { state: number }) => {
-            if (data.state != 2) {
-                onGameExit();
-                if (getGameStatTimer != null) clearInterval(getGameStatTimer);
-            }
-        }
+        url: environment.game.check,
+        onSuccess: (data) => {}
     });
 }

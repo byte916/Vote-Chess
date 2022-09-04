@@ -1,67 +1,74 @@
 ﻿import { send } from './common'
 import { onJoinToGame } from './main';
+import { environment } from './environment'
 
+/**Управление списком игроков */
+export class GameList {
 /**Таймер получения списка игр */
-var getGameListTimer = null;
-/**Список игр */
-var games: string[] = [];
+    static getGameListTimer = null;
 
-/**Запустить механизм получения списка игр */
-export function runGetGameList() {
-    var table = document.querySelector("#main-screen table tbody") as HTMLTableElement;
-    table.innerHTML = "";
-    games.length = 0;
-    games = [];
-    getGameList();
-    // Каждую секунду получаем список игр
-    getGameListTimer = setInterval(getGameList, 1000);
-}
+    /**Список игр */
+    static games: string[] = [];
 
-export function stopGetGameList() {
-    if (getGameListTimer != null) clearInterval(getGameListTimer);
-}
+    /**Запустить механизм получения списка игр */
+    public static run() {
+        var table = document.querySelector("#main-screen table tbody") as HTMLTableElement;
+        table.innerHTML = "";
+        this.games.length = 0;
+        this.games = [];
+        // Каждую секунду получаем список игр
+        this.getGameListTimer = setInterval(() => {
+            new GameList().getGameList();
+        }, 1000);
+    }
 
-function getGameList() {
-    send({
-        method: "GET",
-        url: "game/getgamelist",
-        onSuccess: (gameList: string[]) => {
-            var table = document.querySelector("#main-screen table tbody") as HTMLTableElement;
-            for (let i = 0; i < gameList.length; i++) {
-                if (games.indexOf(gameList[i]) === -1) {
-                    createGameListRow(gameList[i], table);
-                    games.push(gameList[i]);
-                    continue;
+    public static stop() {
+        if (this.getGameListTimer != null) clearInterval(this.getGameListTimer);
+    }
+
+    private getGameList() {
+        var list = new GameList();
+        send({
+            method: "GET",
+            url: environment.gameList.get,
+            onSuccess: (gameList: string[]) => {
+                var table = document.querySelector("#main-screen table tbody") as HTMLTableElement;
+                for (let i = 0; i < gameList.length; i++) {
+                    if (GameList.games.indexOf(gameList[i]) === -1) {
+                        list.createGameListRow(gameList[i], table);
+                        GameList.games.push(gameList[i]);
+                        continue;
+                    }
+                }
+                for (let j = 0; j < GameList.games.length; j++) {
+                    if (gameList.indexOf(GameList.games[j]) === -1) {
+                        table.removeChild(table.querySelector("[data-name=" + GameList.games[j] + "]"));
+                        GameList.games.splice(j, 1);
+                        j--;
+                    }
                 }
             }
-            for (let j = 0; j < games.length; j++) {
-                if (gameList.indexOf(games[j]) === -1) {
-                    table.removeChild(table.querySelector("[data-name=" + games[j] + "]"));
-                    games.splice(j, 1);
-                    j--;
-                }
-            }
-        }
-    });
-}
+        });
+    }
 
-/**
- * Добавить строку с игрок
- * @param name Название игрока, создавшего игру
- * @param tableBody
- */
-function createGameListRow(name: string, tableBody: HTMLTableElement) {
-    var row = document.createElement("tr");
-    row.dataset.name = name;
-    var nameCell = document.createElement("td");
-    nameCell.innerText = name;
-    row.appendChild(nameCell);
-    var buttonCell = document.createElement("td");
-    var button = document.createElement("a");
-    button.onclick = () => { onJoinToGame(name); };
-    button.classList.add("ui", "compact", "inverted", "cv-white-background", "grey", "basic", "button");
-    button.innerText = "Присоединиться";
-    buttonCell.appendChild(button);
-    row.appendChild(buttonCell);
-    tableBody.appendChild(row);
+    /**
+     * Добавить строку с игрок
+     * @param name Название игрока, создавшего игру
+     * @param tableBody
+     */
+    private createGameListRow(name: string, tableBody: HTMLTableElement) {
+        var row = document.createElement("tr");
+        row.dataset.name = name;
+        var nameCell = document.createElement("td");
+        nameCell.innerText = name;
+        row.appendChild(nameCell);
+        var buttonCell = document.createElement("td");
+        var button = document.createElement("a");
+        button.onclick = () => { onJoinToGame(name); };
+        button.classList.add("ui", "compact", "inverted", "cv-white-background", "grey", "basic", "button");
+        button.innerText = "Присоединиться";
+        buttonCell.appendChild(button);
+        row.appendChild(buttonCell);
+        tableBody.appendChild(row);
+    }
 }
