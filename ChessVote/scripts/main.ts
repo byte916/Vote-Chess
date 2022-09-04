@@ -35,16 +35,16 @@ function getState() {
             switch (data.state) {
                 case 0:
                     // Не в игре
-                    hideAllScreens("main-screen");
+                    SwitchScreen.toMain();
                     runGetGameList();
                     break;
                 case 1:
                     // В собственной игре
-                    hideAllScreens("game-master");
+                    SwitchScreen.toMasterGame();
                     break;
                 case 2:
                     // Присоединённый к игре
-                    hideAllScreens("game-slave");
+                    SwitchScreen.toSlaveGame();
                     break;
             }
         }
@@ -53,12 +53,13 @@ function getState() {
 
 /**После нажатия на кнопку Создать новую игру */
 function onGameCreated() {
-    hideAllScreens("game-master");
+    SwitchScreen.toMasterGame();
     stopGetGameList();
 }
 
-function onGameExit() {
-    hideAllScreens("main-screen");
+/**Выйти из игры */
+export function onGameExit() {
+    SwitchScreen.toMain();
     runGetGameList();
 }
 
@@ -67,14 +68,27 @@ export function onJoinToGame(name: string) {
     stopGetGameList();
 }
 
-/**
- * Скрыть все блоки
- * @param except блок, который останется видимым
- */
-export function hideAllScreens(except: string) {
-    document.getElementById("main-screen").style.display = "none";
-    document.getElementById("game-master").style.display = "none";
-    document.getElementById("game-slave").style.display = "none";
 
-    document.getElementById(except).style.display = "";
+export class SwitchScreen {
+    public static toMain() {
+        this.hideScreens();
+        document.getElementById("main-screen").style.display = "";
+    }
+
+    public static toMasterGame() {
+        this.hideScreens();
+        document.getElementById("game-master").style.display = "";
+    }
+
+    public static toSlaveGame() {
+        this.hideScreens();
+        document.getElementById("game-slave").style.display = "";
+
+    }
+
+    private static hideScreens() {
+        document.getElementById("main-screen").style.display = "none";
+        document.getElementById("game-master").style.display = "none";
+        document.getElementById("game-slave").style.display = "none";
+    }
 }

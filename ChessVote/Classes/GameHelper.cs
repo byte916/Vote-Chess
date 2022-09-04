@@ -64,12 +64,23 @@ namespace ChessVote.Classes
 
         public void Exit(string name)
         {
-            var currentGame = _db.Games.FirstOrDefault(g => g.CreatorName == name && g.IsInProgress);
-            if (currentGame == null)
+            var currentGame = _db.Games.Include(g=>g.Participants).FirstOrDefault(g => g.CreatorName == name && g.IsInProgress);
+            if (currentGame != null)
             {
-                return;
+                currentGame.IsInProgress = false;
+                foreach (var currentGameParticipant in currentGame.Participants)
+                {
+                    currentGameParticipant.GameId = null;
+                }
             }
-            currentGame.IsInProgress = false;
+            else
+            {
+                var currentUser = _db.Users.Include(u => u.Game).FirstOrDefault(u => u.Name == name);
+                if (currentUser == null) return;
+                if (currentUser.GameId == null) return;
+                currentUser.GameId = null;
+            }
+
             _db.SaveChanges();
         }
     }
