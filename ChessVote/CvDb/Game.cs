@@ -18,5 +18,8 @@
         
         /// <summary> PGN игры </summary>
         public string PGN { get; set; }
+
+        /// <summary> Список голосований </summary>
+        public List<Vote> Votes { get; set; }
     }
 }

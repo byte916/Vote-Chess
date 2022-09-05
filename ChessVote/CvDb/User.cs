@@ -11,5 +11,7 @@
 
         /// <summary> Игра, к которой присоединился участник </summary>
         public Game Game { get; set; }
+
+        public List<Vote> Votes { get; set; }
     }
 }

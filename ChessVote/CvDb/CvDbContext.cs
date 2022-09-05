@@ -20,6 +20,15 @@ namespace ChessVote.CvDb
                 .HasForeignKey(u => u.GameId)
                 .IsRequired(false);
 
+            modelBuilder.Entity<Vote>().HasKey(v => new
+            {
+                v.GameId,
+                v.UserName,
+                v.Move
+            });
+            modelBuilder.Entity<Vote>().HasOne(v=>v.Game).WithMany(g=>g.Votes).HasForeignKey(v=>v.GameId).OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Vote>().HasOne(v => v.User).WithMany(g => g.Votes).HasForeignKey(v => v.UserName).OnDelete(DeleteBehavior.NoAction);
+
             base.OnModelCreating(modelBuilder);
         }
     }
