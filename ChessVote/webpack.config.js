@@ -19,7 +19,11 @@
             // Точка входа в приложение
             entry: {
                 site: [
+                    "./node_modules/jquery/dist/jquery.js",
                     "./node_modules/toastr/build/toastr.min.css",
+                    "./node_modules/@chrisoakman/chessboardjs/dist/chessboard-1.0.0.js",
+                    "./node_modules/chess.js/chess.js",
+                    "./node_modules/@chrisoakman/chessboardjs/dist/chessboard-1.0.0.min.css",
                     "./scripts/main.ts"
                 ]
             },
@@ -30,6 +34,11 @@
                 path: path.resolve(__dirname, bundleFolder)
             },
             plugins: [
+                new webpack.ProvidePlugin({
+                    $: 'jquery',
+                    jQuery: 'jquery',
+                    "window.jQuery": "jquery"
+                }),
                 new CleanWebpackPlugin({ cleanOnceBeforeBuildPatterns: ['[name]/'] }),
                 new MiniCssExtractPlugin(),
                 new OptimizeCSSAssetsPlugin({

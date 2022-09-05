@@ -69,6 +69,7 @@ namespace ChessVote.Classes
             {
                 CreatorName = name,
                 IsInProgress = true,
+                PGN = "start"
             };
             _db.Games.Add(currentGame);
             _db.SaveChanges();
@@ -77,16 +78,32 @@ namespace ChessVote.Classes
         /// <summary> Присоединиться к игре </summary>
         /// <param name="targetUser">Имя пользователя, к которому необходимо подключиться</param>
         /// <param name="currentUser">Имя текущего пользователя</param>
-        public bool Join(string targetUser,string currentUser )
+        public string? Join(string targetUser,string currentUser )
         {
             var game = _db.Games.Include(g=>g.Participants).FirstOrDefault(g => g.IsInProgress && g.CreatorName == targetUser);
-            if (game == null) return false;
-            if (game.Participants.Any(p=>p.Name == currentUser)) return true;
+            if (game == null) return null;
+            if (game.Participants.Any(p=>p.Name == currentUser)) return game.PGN;
             var current = _db.Users.Find(currentUser);
-            if (current == null) return false;
+            if (current == null) return null;
             game.Participants.Add(current);
             _db.SaveChanges();
+            return game.PGN;
+        }
+
+        public bool SavePgn(string username, string pgn)
+        {
+            var game = _db.Games.FirstOrDefault(g => g.IsInProgress && g.CreatorName == username);
+            if (game == null) return false;
+            game.PGN = pgn;
+            _db.SaveChanges();
             return true;
+        }
+
+        public string? GetPgn(string username)
+        {
+            var game = _db.Games.FirstOrDefault(g => g.IsInProgress && g.CreatorName == username);
+            if (game == null) return null;
+            return game.PGN;
         }
 
         public void Exit(string name)

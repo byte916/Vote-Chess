@@ -15,5 +15,8 @@
 
         /// <summary> Список участников игры </summary>
         public List<User> Participants { get; set; }
+        
+        /// <summary> PGN игры </summary>
+        public string PGN { get; set; }
     }
 }

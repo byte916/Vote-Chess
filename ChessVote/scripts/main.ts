@@ -1,6 +1,6 @@
 ﻿import { documentReady, send } from './common'
 import { GameList } from './game-list'
-import { Game } from './game';
+import { Game, Board } from './game';
 import { environment } from './environment';
 import * as toastr from "toastr"
 // Код последней ошибки 3
@@ -18,6 +18,7 @@ documentReady(() => {
     case 1:
         // В собственной игре
         SwitchScreen.toMasterGame();
+        Game.continue();
         break;
     case 2:
         // Присоединённый к игре
@@ -40,6 +41,7 @@ function onGameCreateClick() {
         onSuccess: () => {
             SwitchScreen.toMasterGame();
             GameList.stopUpdate();
+            Game.start();
         }
     });
 }
@@ -60,10 +62,10 @@ export function onJoinToGameClick(name: string) {
     send({
         method: "get",
         url: environment.game.join + "?id=" + name,
-        onSuccess: () => {
+        onSuccess: (data:{pgn: string}) => {
             SwitchScreen.toSlaveGame();
             GameList.stopUpdate();
-            Game.join();
+            Game.join(data.pgn);
         },
         onError: () => {
             toastr.warning("Произошла ошибка (код ошибки 1)");
