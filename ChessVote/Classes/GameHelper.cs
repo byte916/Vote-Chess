@@ -169,5 +169,20 @@ namespace ChessVote.Classes
             _db.SaveChanges();
             return true;
         }
+
+        public RestoreVoteModel? RestoreVote(string name)
+        {
+            var user = _db.Users.Include(u => u.Game).Include(u => u.Votes).FirstOrDefault(u => u.Name == name);
+            if (user == null) return null;
+            if (user.GameId == null) return null;
+            return user.Votes.Where(v => v.GameId == user.GameId)
+                .OrderByDescending(v => v.Move).Take(1)
+                .Select(v => new RestoreVoteModel()
+                {
+                    from = v.From,
+                    to = v.To,
+                    moves = v.Move
+                }).FirstOrDefault();
+        }
     }
 }

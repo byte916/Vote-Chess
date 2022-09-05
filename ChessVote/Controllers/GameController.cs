@@ -98,5 +98,12 @@ namespace ChessVote.Controllers
 
             return StatusCode(500);
         }
+
+        public ActionResult RestoreVote()
+        {
+            var userName = new UserHelper(HttpContext, _db).GetUser.Name;
+            var result = new GameHelper(_db).RestoreVote(userName);
+            return new JsonResult(result);
+        }
     }
 }

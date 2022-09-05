@@ -52,11 +52,24 @@ export class Game {
         Game.userColor = 'black';
         Game.game = new Chess();
         if (pgn != 'start') Game.game.load_pgn(pgn);
+        Game.RestoreVote();
         Game.movesLength = Game.game.history().length;
         Board.init("board-slave");
     }
 
-
+    /**Восстановить голос (после обновления страницы) */
+    public static RestoreVote() {
+        send({
+            method: "GET",
+            url: environment.game.restorevote,
+            onSuccess: (data: { from: string, to: string, moves: number }) => {
+                if (data == null) return;
+                if (Game.movesLength != data.moves) return;
+                Game.game.move({ from: data.from, to: data.to });
+                Board.setPosition(Game.game.fen());
+            }
+        })
+    }
     
     public static exit() {
         if (Game.getGameStatTimer != null) {
@@ -88,7 +101,7 @@ export class Game {
                             if (pgnData.pgn != 'start') {
                                 Game.game.load_pgn(pgnData.pgn);
                             }
-                            console.log(Game.game.history().length);
+                            Board.setPosition(Game.game.fen());
                             Game.movesLength = data.moves;
                         }
                     });
@@ -139,6 +152,10 @@ export class Board {
     }
 
     board = null;
+
+    static setPosition(fen: string) {
+        Board.board.position(fen);
+    }
     
     static onDragStart(source, piece, position, orientation) {
         // do not pick up pieces if the game is over

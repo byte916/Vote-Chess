@@ -15,6 +15,10 @@
          */
         getpgn: 'game/getpgn',
 
-        vote: 'game/vote'
+        vote: 'game/vote',
+        /**
+         * Получить последний отданный голос (после обновления страницы)
+         */
+        restorevote: 'game/restorevote'
     }
 }
