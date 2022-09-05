@@ -90,6 +90,15 @@ namespace ChessVote.Classes
             return game.PGN;
         }
 
+        /// <summary> Подключиться PGN игры, к которой присоединён игрок (после перезагрузки страницы, например) </summary>
+        /// <param name="currentUser"></param>
+        /// <returns></returns>
+        public string? ReJoin(string currentUser)
+        {
+            var game = _db.Users.Include(u=>u.Game).FirstOrDefault(u=>u.Name == currentUser)?.Game;
+            return game?.PGN;
+        }
+
         public bool SavePgn(string username, string pgn)
         {
             var game = _db.Games.FirstOrDefault(g => g.IsInProgress && g.CreatorName == username);

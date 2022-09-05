@@ -40,6 +40,18 @@ namespace ChessVote.Controllers
             return new JsonResult(new { pgn = pgn });
         }
 
+        public ActionResult ReJoin()
+        {
+            var userName = new UserHelper(HttpContext, _db).GetUser.Name;
+            var pgn = new GameHelper(_db).ReJoin(userName);
+            if (pgn == null)
+            {
+                return new StatusCodeResult(500);
+            }
+
+            return new JsonResult(new { pgn = pgn });
+        }
+
         public ActionResult Exit()
         {
             var userName = new UserHelper(HttpContext, _db).GetUser.Name;

@@ -22,7 +22,7 @@ documentReady(() => {
         break;
     case 2:
         // Присоединённый к игре
-        SwitchScreen.toSlaveGame();
+        onRejoinToGame();
         break;
     }
     // Нажатие на кнопку "Создать новую игру"
@@ -48,6 +48,7 @@ function onGameCreateClick() {
 
 /**Выйти из игры */
 export function onGameExitClick() {
+    if (!confirm("Точно выйти?")) return;
     send({
         method: "GET",
         url: environment.game.exit,
@@ -63,6 +64,22 @@ export function onJoinToGameClick(name: string) {
         method: "get",
         url: environment.game.join + "?id=" + name,
         onSuccess: (data:{pgn: string}) => {
+            SwitchScreen.toSlaveGame();
+            GameList.stopUpdate();
+            Game.join(data.pgn);
+        },
+        onError: () => {
+            toastr.warning("Произошла ошибка (код ошибки 1)");
+        }
+    });
+}
+
+/**Переподключиться к чужой игре (после восстановления связи) */
+function onRejoinToGame() {
+    send({
+        method: "get",
+        url: environment.game.rejoin,
+        onSuccess: (data: { pgn: string }) => {
             SwitchScreen.toSlaveGame();
             GameList.stopUpdate();
             Game.join(data.pgn);

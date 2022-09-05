@@ -5,6 +5,7 @@
     game: {
         create: 'game/create',
         join: 'game/join',
+        rejoin: 'game/rejoin',
         check: 'game/check',
         exit: 'game/exit',
 
