@@ -11,8 +11,10 @@
 
         savepgn: 'game/savepgn',
         /**
-         * Получить PGN (при возобновлении своей игры)
+         * Получить PGN (при возобновлении своей игры или при выполнении хода)
          */
-        getpgn: 'game/getpgn'
+        getpgn: 'game/getpgn',
+
+        vote: 'game/vote'
     }
 }

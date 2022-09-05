@@ -59,11 +59,11 @@ namespace ChessVote.Controllers
             return new StatusCodeResult(200);
         }
 
-        public ActionResult SavePgn(string? pgn)
+        public ActionResult SavePgn(string? pgn, int? moves)
         {
             pgn ??= "start";
             var userName = new UserHelper(HttpContext, _db).GetUser.Name;
-            if (new GameHelper(_db).SavePgn(userName, pgn)) return new StatusCodeResult(200);
+            if (new GameHelper(_db).SavePgn(userName, pgn, moves.GetValueOrDefault(0))) return new StatusCodeResult(200);
             return new StatusCodeResult(500);
         }
 
@@ -81,6 +81,22 @@ namespace ChessVote.Controllers
             }
 
             return new JsonResult(new { pgn = pgn });
+        }
+
+        /// <summary> Проголосовать за ход </summary>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <param name="moves"></param>
+        /// <returns></returns>
+        public ActionResult Vote(string from, string to, int moves)
+        {
+            var userName = new UserHelper(HttpContext, _db).GetUser.Name;
+            if (new GameHelper(_db).Vote(userName, from, to, moves))
+            {
+                return StatusCode(200);
+            }
+
+            return StatusCode(500);
         }
     }
 }

@@ -18,7 +18,6 @@
         /// <summary> Ход куда </summary>
         public string To { get; set; }
 
-
         public Game Game { get; set; }
 
         public User User { get; set; }

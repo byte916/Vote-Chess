@@ -34,14 +34,24 @@ namespace ChessVote.Classes
         {
             var result = new CheckModel();
 
-            var currentGame = _db.Games.FirstOrDefault(g => g.CreatorName == name && g.IsInProgress);
-            if (currentGame != null) result.status = GameStatus.Owner;
+            var currentGame = _db.Games.Include(g=>g.Votes).FirstOrDefault(g => g.CreatorName == name && g.IsInProgress);
+            if (currentGame != null)
+            {
+                result.status = GameStatus.Owner;
+                result.moves = currentGame.Moves;
+                result.votes = currentGame.Votes.Count(v => v.Move == result.moves);
+            }
             else
             {
-                var currentUser = _db.Users.Include(u => u.Game).FirstOrDefault(u => u.Name == name);
+                var currentUser = _db.Users.Include(u => u.Game)
+                    .Include(u => u.Game.Votes)
+                    .FirstOrDefault(u => u.Name == name);
+
                 if (currentUser != null && currentUser.GameId != null && currentUser.Game.IsInProgress)
                 {
                     result.status = GameStatus.Joined;
+                    result.moves = currentUser.Game.Moves;
+                    result.votes = currentUser.Game.Votes.Count(v => v.Move == result.moves);
                 }
                 else
                 {
@@ -99,20 +109,21 @@ namespace ChessVote.Classes
             return game?.PGN;
         }
 
-        public bool SavePgn(string username, string pgn)
+        public bool SavePgn(string username, string pgn, int moves)
         {
             var game = _db.Games.FirstOrDefault(g => g.IsInProgress && g.CreatorName == username);
             if (game == null) return false;
             game.PGN = pgn;
+            game.Moves = moves;
             _db.SaveChanges();
             return true;
         }
-
+        
         public string? GetPgn(string username)
         {
             var game = _db.Games.FirstOrDefault(g => g.IsInProgress && g.CreatorName == username);
-            if (game == null) return null;
-            return game.PGN;
+            if (game == null) game = _db.Users.Include(u => u.Game).FirstOrDefault(u => u.Name == username)?.Game;
+            return game?.PGN;
         }
 
         public void Exit(string name)
@@ -135,6 +146,28 @@ namespace ChessVote.Classes
             }
 
             _db.SaveChanges();
+        }
+
+        public bool Vote(string name, string from, string to, int move)
+        {
+            var user = _db.Users.Include(u => u.Game).Include(u => u.Votes).FirstOrDefault(u=>u.Name == name);
+            if (user == null) return false;
+            if (user.GameId == null) return false;
+            var vote = user.Votes.FirstOrDefault(v => v.GameId == user.GameId && v.Move == move);
+            if (vote == null)
+            {
+                vote = new Vote();
+                vote.GameId = user.GameId.Value;
+                vote.UserName = name;
+                vote.Move = move;
+                user.Votes.Add(vote);
+            }
+            
+            vote.From = from;
+            vote.To = to;
+
+            _db.SaveChanges();
+            return true;
         }
     }
 }

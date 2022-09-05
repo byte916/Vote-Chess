@@ -3,7 +3,7 @@ import { GameList } from './game-list'
 import { Game, Board } from './game';
 import { environment } from './environment';
 import * as toastr from "toastr"
-// Код последней ошибки 3
+// Код последней ошибки 4
 /**Состояние игры после загрузки страницы */
 declare var state: number;
 

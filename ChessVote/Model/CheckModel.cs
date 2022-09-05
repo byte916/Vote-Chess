@@ -6,5 +6,11 @@ namespace ChessVote.Model
     {
         /// <summary> Состояние игры </summary>
         public GameStatus status { get; set; }
+
+        /// <summary> Количество сделанных ходов в игре </summary>
+        public int moves { get; set; }
+
+        /// <summary> Количество голосов в игре </summary>
+        public int votes { get; set; }
     }
 }
