@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="site.css" />
     <script>
         var state = @ViewData["State"];
+        var color = '@ViewData["Color"]';
     </script>
     <script src="site/script.js"></script>
     <style>
@@ -55,12 +56,15 @@
 </div>
 <div id="main-screen" class="ui vertical basic padded segment">
     <div class="ui center aligned container" style="padding-top: 80px;">
-        <table id="game-list" class="ui collapsing table">
+        <div style="padding-bottom: 10px">Создать игру</div>
+        <button id="btn_white_create_game" class="ui basic inverted cv-white-background grey basic icon button">Белые</button>
+        <button id="btn_black_create_game" class="ui basic inverted cv-white-background grey basic icon button">Черные</button>
+        <br/>
+        <table id="game-list" style="margin-top: 20px" class="ui collapsing table">
             <tbody>
             </tbody>
         </table>
         <br/>
-        <button id="btn_create_game" class="ui basic inverted cv-white-background grey basic button">Создать игру</button>
     </div>
 </div>
 @* Экран создателя игры *@

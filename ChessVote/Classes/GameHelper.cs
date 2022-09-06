@@ -18,13 +18,26 @@ namespace ChessVote.Classes
         /// </summary>
         /// <param name="name">Имя текущего пользователя</param>
         /// <returns></returns>
-        public GameStatus GetState(string name)
+        public StateModel GetState(string name)
         {
+            var result = new StateModel();
             var currentGame = _db.Games.FirstOrDefault(g => g.CreatorName == name && g.IsInProgress);
-            if (currentGame != null) return GameStatus.Owner;
+            if (currentGame != null)
+            {
+                result.State = GameStatus.Owner;
+                result.Color = currentGame.Color == "black" ? "b" : "w";
+                return result;
+            }
             var currentUser = _db.Users.Include(u=>u.Game).FirstOrDefault(u => u.Name == name);
-            if (currentUser != null && currentUser.GameId != null && currentUser.Game.IsInProgress) return GameStatus.Joined;
-            return GameStatus.None;
+            if (currentUser != null && currentUser.GameId != null && currentUser.Game.IsInProgress)
+            {
+                result.State = GameStatus.Joined;
+                result.Color = currentUser.Game.Color == "black" ? "w" : "b";
+                return result;
+            }
+
+            result.State = GameStatus.None;
+            return result;
         }
 
         /// <summary> Получить информацию об игре </summary>
@@ -82,7 +95,7 @@ namespace ChessVote.Classes
             return _db.Games.Where(g => g.IsInProgress).Select(g => g.CreatorName).ToList();
         }
 
-        public void Create(string name)
+        public void Create(string name, string color)
         {
             var currentGame = _db.Games.FirstOrDefault(g => g.CreatorName == name && g.IsInProgress);
             if (currentGame != null)
@@ -94,7 +107,8 @@ namespace ChessVote.Classes
             {
                 CreatorName = name,
                 IsInProgress = true,
-                PGN = "start"
+                PGN = "start",
+                Color = color == "b" ? "black" : "white"
             };
             _db.Games.Add(currentGame);
             _db.SaveChanges();
@@ -103,25 +117,45 @@ namespace ChessVote.Classes
         /// <summary> Присоединиться к игре </summary>
         /// <param name="targetUser">Имя пользователя, к которому необходимо подключиться</param>
         /// <param name="currentUser">Имя текущего пользователя</param>
-        public string? Join(string targetUser,string currentUser )
+        public JoinModel? Join(string targetUser,string currentUser )
         {
+            var result = new JoinModel();
             var game = _db.Games.Include(g=>g.Participants).FirstOrDefault(g => g.IsInProgress && g.CreatorName == targetUser);
             if (game == null) return null;
-            if (game.Participants.Any(p=>p.Name == currentUser)) return game.PGN;
+            if (game.Participants.Any(p => p.Name == currentUser))
+            {
+                result = new JoinModel()
+                {
+                    pgn = game.PGN,
+                    color = game.Color == "black" ? "white" : "black"
+                };
+                return result;
+            }
             var current = _db.Users.Find(currentUser);
             if (current == null) return null;
             game.Participants.Add(current);
             _db.SaveChanges();
-            return game.PGN;
+
+            result = new JoinModel()
+            {
+                pgn = game.PGN,
+                color = game.Color == "black" ? "white" : "black"
+            };
+            return result;
         }
 
         /// <summary> Подключиться PGN игры, к которой присоединён игрок (после перезагрузки страницы, например) </summary>
         /// <param name="currentUser"></param>
         /// <returns></returns>
-        public string? ReJoin(string currentUser)
+        public JoinModel? ReJoin(string currentUser)
         {
             var game = _db.Users.Include(u=>u.Game).FirstOrDefault(u=>u.Name == currentUser)?.Game;
-            return game?.PGN;
+            if (game == null) return null;
+            return new JoinModel()
+            {
+                pgn = game.PGN,
+                color = game.Color == "black" ? "white" : "black"
+            };
         }
 
         public bool SavePgn(string username, string pgn, int moves)

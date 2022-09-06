@@ -18,7 +18,9 @@ namespace ChessVote.Controllers
         {
             var userHelper = new UserHelper(HttpContext, _db);
             ViewData["UserName"] = userHelper.GetUser.Name;
-            ViewData["State"] = (int)new GameHelper(_db).GetState(userHelper.GetUser.Name);
+            var state = new GameHelper(_db).GetState(userHelper.GetUser.Name);
+            ViewData["State"] = (int)state.State;
+            ViewData["Color"] = state.Color;
 
             return View();
         }

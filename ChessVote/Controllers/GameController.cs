@@ -13,10 +13,10 @@ namespace ChessVote.Controllers
             _db = context;
         }
         
-        public ActionResult Create()
+        public ActionResult Create(string color)
         {
             var userName = new UserHelper(HttpContext, _db).GetUser.Name;
-            new GameHelper(_db).Create(userName);
+            new GameHelper(_db).Create(userName, color);
             return new StatusCodeResult(200);
         }
 
@@ -37,7 +37,7 @@ namespace ChessVote.Controllers
                 return new StatusCodeResult(500);
             }
 
-            return new JsonResult(new { pgn = pgn });
+            return new JsonResult(pgn);
         }
 
         public ActionResult ReJoin()
@@ -49,7 +49,7 @@ namespace ChessVote.Controllers
                 return new StatusCodeResult(500);
             }
 
-            return new JsonResult(new { pgn = pgn });
+            return new JsonResult(pgn);
         }
 
         public ActionResult Exit()

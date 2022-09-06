@@ -24,5 +24,8 @@
 
         /// <summary> Список голосований </summary>
         public List<Vote> Votes { get; set; }
+
+        /// <summary> Цвет создателя </summary>
+        public string Color { get; set; }
     }
 }

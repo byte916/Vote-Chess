@@ -6,6 +6,7 @@ import * as toastr from "toastr"
 // Код последней ошибки 4
 /**Состояние игры после загрузки страницы */
 declare var state: number;
+declare var color: string;
 
 documentReady(() => {
     (document.querySelector(".finishVote") as HTMLElement).style.display = 'none';
@@ -20,7 +21,7 @@ documentReady(() => {
     case 1:
         // В собственной игре
         SwitchScreen.toMasterGame();
-        Game.continue();
+        Game.continue(color);
         break;
     case 2:
         // Присоединённый к игре
@@ -28,7 +29,8 @@ documentReady(() => {
         break;
     }
     // Нажатие на кнопку "Создать новую игру"
-    document.getElementById('btn_create_game').addEventListener('click', onGameCreateClick);
+    document.getElementById('btn_white_create_game').addEventListener('click', () => { onGameCreateClick("w") });
+    document.getElementById('btn_black_create_game').addEventListener('click', () => { onGameCreateClick("b") });
 
     document.querySelectorAll(".exit").forEach(element => {
         element.addEventListener('click', onGameExitClick);
@@ -39,15 +41,17 @@ documentReady(() => {
     document.querySelector(".cancelVote").addEventListener('click', onCancelVoteClick);
 });
 
+
+
 /**Нажатие на кнопку Создать новую игру */
-function onGameCreateClick() {
+function onGameCreateClick(color: string) {
     send({
         method: "GET",
-        url: environment.game.create,
+        url: environment.game.create + "?color=" + color,
         onSuccess: () => {
             SwitchScreen.toMasterGame();
             GameList.stopUpdate();
-            Game.start();
+            Game.start(color);
         }
     });
 }
@@ -101,10 +105,10 @@ export function onJoinToGameClick(name: string) {
     send({
         method: "get",
         url: environment.game.join + "?id=" + name,
-        onSuccess: (data:{pgn: string}) => {
+        onSuccess: (data:{pgn: string, color: string}) => {
             SwitchScreen.toSlaveGame();
             GameList.stopUpdate();
-            Game.join(data.pgn);
+            Game.join(data.pgn, data.color);
         },
         onError: () => {
             toastr.warning("Произошла ошибка (код ошибки 1)");
@@ -117,10 +121,10 @@ function onRejoinToGame() {
     send({
         method: "get",
         url: environment.game.rejoin,
-        onSuccess: (data: { pgn: string }) => {
+        onSuccess: (data: { pgn: string, color: string }) => {
             SwitchScreen.toSlaveGame();
             GameList.stopUpdate();
-            Game.join(data.pgn);
+            Game.join(data.pgn, data.color);
         },
         onError: () => {
             toastr.warning("Произошла ошибка (код ошибки 1)");

@@ -14,10 +14,10 @@ export class Game {
     static movesLength;
     
     /**Создать игру */
-    public static start() {
+    public static start(color: string) {
         if (Game.getGameStatTimer != null) return;
         Game.getGameStatTimer = setInterval(Game.getGameState, 1000);
-        Game.userColor = 'white';
+        Game.userColor = color == 'b' ? 'black' : 'white';
         Game.game = new Chess();
         Game.SavePgn();
         Game.isMaster = true;
@@ -25,10 +25,10 @@ export class Game {
     }
 
     /**Продолжить собственную игру */
-    public static continue() {
+    public static continue(color: string) {
         if (Game.getGameStatTimer != null) return;
         Game.getGameStatTimer = setInterval(Game.getGameState, 1000);
-        Game.userColor = 'white';
+        Game.userColor = color == 'b' ? 'black' : 'white';
 
         send({
             method: "GET",
@@ -45,11 +45,12 @@ export class Game {
     }
 
     /**Присоединиться к игре */
-    public static join(pgn: string) {
+    public static join(pgn: string, color: string) {
         if (Game.getGameStatTimer != null) return;
         Game.getGameStatTimer = setInterval(Game.getGameState, 1000);
-        
-        Game.userColor = 'black';
+
+        Game.userColor = color == 'b' ? 'black' : 'white';
+        Game.isMaster = false;
         Game.game = new Chess();
         if (pgn != 'start') Game.game.load_pgn(pgn);
         (document.querySelector(".cancelVote") as HTMLElement).style.display = 'none';
