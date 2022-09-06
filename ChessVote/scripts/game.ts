@@ -94,6 +94,9 @@ export class Game {
                 }
                 document.querySelectorAll(".vote_counter").forEach(i => i.innerHTML = "Проголосовало: " + data.votes);
                 document.querySelectorAll(".online_counter").forEach(i => i.innerHTML = "В игре: " + data.online);
+                if (Game.isMaster && data.votes > 0) {
+                    (document.querySelector(".finishVote") as HTMLElement).style.display = '';
+                }
                 if (Game.isMaster) return;
                 if (Game.movesLength != data.moves) {
                     send({
@@ -128,6 +131,7 @@ export class Game {
     static Move(from, to) {
         if (Game.isMaster) {
             Game.SavePgn();
+            (document.querySelector(".finishVote") as HTMLElement).style.display = '';
             return;
         }
 
@@ -152,6 +156,7 @@ export class Game {
         Game.game.move({ from: from, to: to });
         Board.setPosition(Game.game.fen());
         Game.SavePgn();
+        (document.querySelector(".finishVote") as HTMLElement).style.display = 'none';
 
     }
 }

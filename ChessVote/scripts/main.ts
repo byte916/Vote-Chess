@@ -8,6 +8,8 @@ import * as toastr from "toastr"
 declare var state: number;
 
 documentReady(() => {
+    (document.querySelector(".finishVote") as HTMLElement).style.display = 'none';
+
     // В зависимости от текущего состояния переходим в соответствующий режим
     switch (state) {
     case 0:
