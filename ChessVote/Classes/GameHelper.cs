@@ -202,5 +202,16 @@ namespace ChessVote.Classes
             var percent = (maxVotes[0].count / votes.Count) * 100;
             return new FinishVoteModel() { result = percent + "%", from = maxVotes[0].from, to = maxVotes[0].to };
         }
+
+        public bool UndoVote(string name)
+        {
+            var user = _db.Users.Include(u => u.Game).Include(u => u.Votes).FirstOrDefault(u => u.Name == name);
+            if (user == null) return false;
+            var vote = user.Votes.FirstOrDefault(v => v.GameId == user.GameId && v.Move == user.Game.Moves);
+            if (vote == null) return false;
+            _db.Entry(vote).State = EntityState.Deleted;
+            _db.SaveChanges();
+            return true;
+        }
     }
 }

@@ -113,5 +113,13 @@ namespace ChessVote.Controllers
 
             return new JsonResult(result);
         }
+
+        public ActionResult UndoVote()
+        {
+            var userName = new UserHelper(HttpContext, _db).GetUser.Name;
+            var result = new GameHelper(_db).UndoVote(userName);
+            if (result) return Ok();
+            return StatusCode(500);
+        }
     }
 }

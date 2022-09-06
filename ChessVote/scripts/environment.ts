@@ -17,6 +17,7 @@
 
         finishvote: 'game/finishvote',
         vote: 'game/vote',
+        undovote: 'game/undovote',
         /**
          * Получить последний отданный голос (после обновления страницы)
          */

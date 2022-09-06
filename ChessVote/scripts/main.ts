@@ -33,6 +33,8 @@ documentReady(() => {
     });
 
     document.querySelector(".finishVote").addEventListener('click', onFinishVoteClick);
+
+    document.querySelector(".cancelVote").addEventListener('click', onCancelVoteClick);
 });
 
 /**Нажатие на кнопку Создать новую игру */
@@ -48,6 +50,20 @@ function onGameCreateClick() {
     });
 }
 
+/**Отменить голос */
+function onCancelVoteClick() {
+    var undo = Game.game.undo();
+    if (undo == null) return;
+    send({
+        method: "GET",
+        url: environment.game.undovote,
+        onSuccess: () => {
+            Board.setPosition(Game.game.fen());
+            (document.querySelector(".cancelVote") as HTMLElement).style.display = 'none';
+        }
+    });
+}
+
 function onFinishVoteClick() {
     send({
         method: "GET",
@@ -55,6 +71,7 @@ function onFinishVoteClick() {
         onSuccess: (data: {result: string, from: string, to: string}) => {
             if (data.result == '') {
                 toastr.warning("Несколько ходов набрали равное количество голосов. Нужны новые голоса или чтобы кто-то переголосовал.");
+                return;
             }
             Game.FinishVote(data.from, data.to);
             toastr.success("За этот ход проголосовало " + data.result);
@@ -64,6 +81,9 @@ function onFinishVoteClick() {
 
 /**Выйти из игры */
 export function onGameExitClick() {
+    if (Game.isMaster && !confirm("Игра будет завершена")) {
+        return;
+    }
     if (!confirm("Точно выйти?")) return;
     send({
         method: "GET",

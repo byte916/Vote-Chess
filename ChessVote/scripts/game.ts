@@ -52,6 +52,7 @@ export class Game {
         Game.userColor = 'black';
         Game.game = new Chess();
         if (pgn != 'start') Game.game.load_pgn(pgn);
+        (document.querySelector(".cancelVote") as HTMLElement).style.display = 'none';
         Game.RestoreVote();
         Game.movesLength = Game.game.history().length;
         Board.init("board-slave");
@@ -67,6 +68,7 @@ export class Game {
                 if (Game.movesLength != data.moves) return;
                 Game.game.move({ from: data.from, to: data.to });
                 Board.setPosition(Game.game.fen());
+                (document.querySelector(".cancelVote") as HTMLElement).style.display = '';
             }
         })
     }
@@ -103,6 +105,7 @@ export class Game {
                             }
                             Board.setPosition(Game.game.fen());
                             Game.movesLength = data.moves;
+                            (document.querySelector(".cancelVote") as HTMLElement).style.display = 'none';
                         }
                     });
                 }
@@ -130,6 +133,9 @@ export class Game {
         send({
             method: "GET",
             url: environment.game.vote + "?from=" + from + "&to=" + to + "&moves=" + Game.movesLength,
+            onSuccess: () => {
+                (document.querySelector(".cancelVote") as HTMLElement).style.display = '';
+            },
             onError: () => {
                 toastr.warning("Произошла ошибка. Обновите страницу и попробуйте снова (код 4)");
             }
