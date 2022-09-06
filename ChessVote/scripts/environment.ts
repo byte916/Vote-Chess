@@ -15,6 +15,7 @@
          */
         getpgn: 'game/getpgn',
 
+        finishvote: 'game/finishvote',
         vote: 'game/vote',
         /**
          * Получить последний отданный голос (после обновления страницы)

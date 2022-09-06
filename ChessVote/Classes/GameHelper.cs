@@ -184,5 +184,23 @@ namespace ChessVote.Classes
                     moves = v.Move
                 }).FirstOrDefault();
         }
+
+        public FinishVoteModel FinishVote(string name)
+        {
+            var game = _db.Games.Include(g => g.Votes).FirstOrDefault(g => g.CreatorName == name && g.IsInProgress);
+            if (game == null) throw new Exception();
+            var votes = game.Votes.Where(v=>v.Move == game.Moves).ToList();
+            if (!votes.Any()) return new FinishVoteModel(){result = ""};
+            var groupedVotes = votes.GroupBy(v => new { v.From, v.To },
+                (move, moves) => new { count = moves.Count(), from = move.From, to = move.To }).ToList();
+            var maxVotes = groupedVotes.Where(g => g.count == groupedVotes.Max(v => v.count)).ToList();
+            if (maxVotes.Count > 1)
+            {
+                return new FinishVoteModel() { result = "" };
+            }
+
+            var percent = (maxVotes[0].count / votes.Count) * 100;
+            return new FinishVoteModel() { result = percent + "%", from = maxVotes[0].from, to = maxVotes[0].to };
+        }
     }
 }

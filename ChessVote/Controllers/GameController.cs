@@ -105,5 +105,13 @@ namespace ChessVote.Controllers
             var result = new GameHelper(_db).RestoreVote(userName);
             return new JsonResult(result);
         }
+
+        public ActionResult FinishVote()
+        {
+            var userName = new UserHelper(HttpContext, _db).GetUser.Name;
+            var result = new GameHelper(_db).FinishVote(userName);
+
+            return new JsonResult(result);
+        }
     }
 }

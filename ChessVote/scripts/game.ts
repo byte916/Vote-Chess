@@ -135,6 +135,18 @@ export class Game {
             }
         });
     }
+
+    /**
+     * Применить указанный ход и финишировать голосование
+     * @param from
+     * @param to
+     */
+    static FinishVote(from, to) {
+        Game.game.move({ from: from, to: to });
+        Board.setPosition(Game.game.fen());
+        Game.SavePgn();
+
+    }
 }
 
 export class Board {
