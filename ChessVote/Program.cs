@@ -35,6 +35,7 @@ var app = builder.Build();
 // Включаем статические файлы
 app.UseStaticFiles();
 app.UseAuthentication();
+app.UseHttpsRedirection();
 app.UseMvc(routeBuilder =>
 {
     routeBuilder.MapRoute(
