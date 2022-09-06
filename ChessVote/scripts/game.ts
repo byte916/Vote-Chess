@@ -93,6 +93,7 @@ export class Game {
                     return;
                 }
                 document.querySelectorAll(".vote_counter").forEach(i => i.innerHTML = "Проголосовало: " + data.votes);
+                document.querySelectorAll(".online_counter").forEach(i => i.innerHTML = "В игре: " + data.online);
                 if (Game.isMaster) return;
                 if (Game.movesLength != data.moves) {
                     send({
@@ -216,7 +217,6 @@ class GameCheck {
      * Статус игры
      */
     public status: number;
-
     /**
      * Количество сделанных ходов
      */
@@ -225,4 +225,8 @@ class GameCheck {
      * Количество проголосовавших людей
      */
     public votes: number;
+    /**
+     * Количество игроков онлайн
+     */
+    public online: number;
 }

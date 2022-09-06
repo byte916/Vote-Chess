@@ -34,17 +34,31 @@ namespace ChessVote.Classes
         {
             var result = new CheckModel();
 
-            var currentGame = _db.Games.Include(g=>g.Votes).FirstOrDefault(g => g.CreatorName == name && g.IsInProgress);
+            var currentGame = _db.Games.Include(g => g.Votes)
+                .Include(g => g.Participants)
+                .FirstOrDefault(g => g.CreatorName == name && g.IsInProgress);
+
+
+            // Обновляем время последнего посещения
+            var user = _db.Users.FirstOrDefault(u => u.Name == name);
+            if (user != null)
+            {
+                user.Online = DateTime.Now;
+                _db.SaveChanges();
+            }
+
             if (currentGame != null)
             {
                 result.status = GameStatus.Owner;
                 result.moves = currentGame.Moves;
                 result.votes = currentGame.Votes.Count(v => v.Move == result.moves);
+                result.online = currentGame.Participants.Count(p => p.Online > DateTime.Now.AddSeconds(-5));
             }
             else
             {
                 var currentUser = _db.Users.Include(u => u.Game)
                     .Include(u => u.Game.Votes)
+                    .Include(u => u.Game.Participants)
                     .FirstOrDefault(u => u.Name == name);
 
                 if (currentUser != null && currentUser.GameId != null && currentUser.Game.IsInProgress)
@@ -52,6 +66,7 @@ namespace ChessVote.Classes
                     result.status = GameStatus.Joined;
                     result.moves = currentUser.Game.Moves;
                     result.votes = currentUser.Game.Votes.Count(v => v.Move == result.moves);
+                    result.online = currentUser.Game.Participants.Count(g=>g.Online > DateTime.Now.AddSeconds(-5));
                 }
                 else
                 {
@@ -215,3 +230,8 @@ namespace ChessVote.Classes
         }
     }
 }
+
+/*
+ *Выводить число игроков в игре
+ * Разрешить выбор цвета
+ */

@@ -13,5 +13,8 @@
         public Game Game { get; set; }
 
         public List<Vote> Votes { get; set; }
+
+        /// <summary> Время, когда человек был онлайн </summary>
+        public DateTime Online { get; set; }
     }
 }

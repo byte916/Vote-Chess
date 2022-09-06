@@ -12,5 +12,8 @@ namespace ChessVote.Model
 
         /// <summary> Количество голосов в игре </summary>
         public int votes { get; set; }
+
+        /// <summary> Количество людей Онлайн </summary>
+        public int online { get; set; }
     }
 }
