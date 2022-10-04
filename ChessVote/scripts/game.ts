@@ -49,7 +49,7 @@ export class Game {
         if (Game.getGameStatTimer != null) return;
         Game.getGameStatTimer = setInterval(Game.getGameState, 1000);
 
-        Game.userColor = color == 'b' ? 'black' : 'white';
+        Game.userColor = color == 'black' ? 'black' : 'white';
         Game.isMaster = false;
         Game.game = new Chess();
         if (pgn != 'start') Game.game.load_pgn(pgn);
