@@ -34,22 +34,21 @@ export class GameList {
         var list = new GameList();
         send({
             method: "GET",
-            url: environment.gameList.get,
-            onSuccess: (gameList: string[]) => {
-                var table = document.querySelector("#main-screen table tbody") as HTMLTableElement;
-                for (let i = 0; i < gameList.length; i++) {
-                    if (GameList.games.indexOf(gameList[i]) === -1) {
-                        list.createGameListRow(gameList[i], table);
-                        GameList.games.push(gameList[i]);
-                        continue;
-                    }
+            url: environment.gameList.get
+        }).then((gameList: string[]) => {
+            var table = document.querySelector("#main-screen table tbody") as HTMLTableElement;
+            for (let i = 0; i < gameList.length; i++) {
+                if (GameList.games.indexOf(gameList[i]) === -1) {
+                    list.createGameListRow(gameList[i], table);
+                    GameList.games.push(gameList[i]);
+                    continue;
                 }
-                for (let j = 0; j < GameList.games.length; j++) {
-                    if (gameList.indexOf(GameList.games[j]) === -1) {
-                        table.removeChild(table.querySelector("[data-name=" + GameList.games[j] + "]"));
-                        GameList.games.splice(j, 1);
-                        j--;
-                    }
+            }
+            for (let j = 0; j < GameList.games.length; j++) {
+                if (gameList.indexOf(GameList.games[j]) === -1) {
+                    table.removeChild(table.querySelector("[data-name=" + GameList.games[j] + "]"));
+                    GameList.games.splice(j, 1);
+                    j--;
                 }
             }
         });

@@ -48,11 +48,10 @@ function onGameCreateClick(color: string) {
     send({
         method: "GET",
         url: environment.game.create + "?color=" + color,
-        onSuccess: () => {
-            SwitchScreen.toMasterGame();
-            GameList.stopUpdate();
-            Game.start(color);
-        }
+    }).then(() => {
+        SwitchScreen.toMasterGame();
+        GameList.stopUpdate();
+        Game.start(color);
     });
 }
 
@@ -62,27 +61,25 @@ function onCancelVoteClick() {
     if (undo == null) return;
     send({
         method: "GET",
-        url: environment.game.undovote,
-        onSuccess: () => {
-            Board.setPosition(Game.game.fen());
-            (document.querySelector(".cancelVote") as HTMLElement).style.display = 'none';
-        }
+        url: environment.game.undovote
+    }).then(() => {
+        Board.setPosition(Game.game.fen());
+        (document.querySelector(".cancelVote") as HTMLElement).style.display = 'none';
     });
 }
 
 function onFinishVoteClick() {
     send({
         method: "GET",
-        url: environment.game.finishvote,
-        onSuccess: (data: {result: string, from: string, to: string}) => {
-            if (data.result == '') {
-                toastr.warning("Несколько ходов набрали равное количество голосов. Нужны новые голоса или чтобы кто-то переголосовал.");
-                return;
-            }
-            Game.FinishVote(data.from, data.to);
-            toastr.success("За этот ход проголосовало " + data.result);
+        url: environment.game.finishvote
+    }).then((data: { result: string, from: string, to: string }) => {
+        if (data.result == '') {
+            toastr.warning("Несколько ходов набрали равное количество голосов. Нужны новые голоса или чтобы кто-то переголосовал.");
+            return;
         }
-    })
+        Game.FinishVote(data.from, data.to);
+        toastr.success("За этот ход проголосовало " + data.result);
+    });
 }
 
 /**Выйти из игры */
@@ -93,26 +90,23 @@ export function onGameExitClick() {
     if (!confirm("Точно выйти?")) return;
     send({
         method: "GET",
-        url: environment.game.exit,
-        onSuccess: () => {
-            SwitchScreen.toMain();
-            GameList.runUpdate();
-        }
+        url: environment.game.exit
+    }).then(() => {
+        SwitchScreen.toMain();
+        GameList.runUpdate();
     });
 }
 
 export function onJoinToGameClick(name: string) {
     send({
         method: "get",
-        url: environment.game.join + "?id=" + name,
-        onSuccess: (data:{pgn: string, color: string}) => {
-            SwitchScreen.toSlaveGame();
-            GameList.stopUpdate();
-            Game.join(data.pgn, data.color);
-        },
-        onError: () => {
-            toastr.warning("Произошла ошибка (код ошибки 1)");
-        }
+        url: environment.game.join + "?id=" + name
+    }).then((data: { pgn: string, color: string }) => {
+        SwitchScreen.toSlaveGame();
+        GameList.stopUpdate();
+        Game.join(data.pgn, data.color);
+    }, () => {
+        toastr.warning("Произошла ошибка (код ошибки 1)");
     });
 }
 
@@ -120,15 +114,13 @@ export function onJoinToGameClick(name: string) {
 function onRejoinToGame() {
     send({
         method: "get",
-        url: environment.game.rejoin,
-        onSuccess: (data: { pgn: string, color: string }) => {
-            SwitchScreen.toSlaveGame();
-            GameList.stopUpdate();
-            Game.join(data.pgn, data.color);
-        },
-        onError: () => {
-            toastr.warning("Произошла ошибка (код ошибки 1)");
-        }
+        url: environment.game.rejoin
+    }).then((data: { pgn: string, color: string }) => {
+        SwitchScreen.toSlaveGame();
+        GameList.stopUpdate();
+        Game.join(data.pgn, data.color);
+    }, () => {
+        toastr.warning("Произошла ошибка (код ошибки 1)");
     });
 }
 

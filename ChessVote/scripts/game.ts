@@ -32,15 +32,14 @@ export class Game {
 
         send({
             method: "GET",
-            url: environment.game.getpgn,
-            onSuccess: (data: { pgn: string }) => {
-                Game.game = new Chess();
-                if (data.pgn != 'start') {
-                    Game.game.load_pgn(data.pgn);
-                }
-                Game.isMaster = true;
-                Board.init("board-master");
+            url: environment.game.getpgn
+        }).then((data: { pgn: string }) => {
+            Game.game = new Chess();
+            if (data.pgn != 'start') {
+                Game.game.load_pgn(data.pgn);
             }
+            Game.isMaster = true;
+            Board.init("board-master");
         });
     }
 
@@ -63,15 +62,14 @@ export class Game {
     public static RestoreVote() {
         send({
             method: "GET",
-            url: environment.game.restorevote,
-            onSuccess: (data: { from: string, to: string, moves: number }) => {
-                if (data == null) return;
-                if (Game.movesLength != data.moves) return;
-                Game.game.move({ from: data.from, to: data.to });
-                Board.setPosition(Game.game.fen());
-                (document.querySelector(".cancelVote") as HTMLElement).style.display = '';
-            }
-        })
+            url: environment.game.restorevote
+        }).then((data: { from: string, to: string, moves: number }) => {
+            if (data == null) return;
+            if (Game.movesLength != data.moves) return;
+            Game.game.move({ from: data.from, to: data.to });
+            Board.setPosition(Game.game.fen());
+            (document.querySelector(".cancelVote") as HTMLElement).style.display = '';
+        });
     }
     
     public static exit() {
@@ -81,39 +79,38 @@ export class Game {
         }
     }
 
+    /**Получить состояние игры */
     public static getGameState() {
         send({
             method: "GET",
-            url: environment.game.check,
-            onSuccess: (data: GameCheck) => {
-                // Если человек не подключен к игре
-                if (data.status == 0) {
-                    Game.exit();
-                    SwitchScreen.toMain();
-                    GameList.runUpdate();
-                    return;
-                }
-                document.querySelectorAll(".vote_counter").forEach(i => i.innerHTML = "Проголосовало: " + data.votes);
-                document.querySelectorAll(".online_counter").forEach(i => i.innerHTML = "В игре: " + data.online);
-                if (Game.isMaster && data.votes > 0) {
-                    (document.querySelector(".finishVote") as HTMLElement).style.display = '';
-                }
-                if (Game.isMaster) return;
-                if (Game.movesLength != data.moves) {
-                    send({
-                        method: "GET",
-                        url: environment.game.getpgn,
-                        onSuccess: (pgnData: { pgn: string }) => {
-                            Game.game = new Chess();
-                            if (pgnData.pgn != 'start') {
-                                Game.game.load_pgn(pgnData.pgn);
-                            }
-                            Board.setPosition(Game.game.fen());
-                            Game.movesLength = data.moves;
-                            (document.querySelector(".cancelVote") as HTMLElement).style.display = 'none';
-                        }
-                    });
-                }
+            url: environment.game.check
+        }).then((data: GameCheck) => {
+            // Если человек не подключен к игре
+            if (data.status == 0) {
+                Game.exit();
+                SwitchScreen.toMain();
+                GameList.runUpdate();
+                return;
+            }
+            document.querySelectorAll(".vote_counter").forEach(i => i.innerHTML = "Проголосовало: " + data.votes);
+            document.querySelectorAll(".online_counter").forEach(i => i.innerHTML = "В игре: " + data.online);
+            if (Game.isMaster && data.votes > 0) {
+                (document.querySelector(".finishVote") as HTMLElement).style.display = '';
+            }
+            if (Game.isMaster) return;
+            if (Game.movesLength != data.moves) {
+                send({
+                    method: "GET",
+                    url: environment.game.getpgn
+                }).then((pgnData: { pgn: string }) => {
+                    Game.game = new Chess();
+                    if (pgnData.pgn != 'start') {
+                        Game.game.load_pgn(pgnData.pgn);
+                    }
+                    Board.setPosition(Game.game.fen());
+                    Game.movesLength = data.moves;
+                    (document.querySelector(".cancelVote") as HTMLElement).style.display = 'none';
+                });
             }
         });
     }
@@ -121,10 +118,9 @@ export class Game {
     static SavePgn() {
         send({
             method: "GET",
-            url: environment.game.savepgn + "?pgn=" + Game.game.pgn() + "&moves=" + Game.game.history().length,
-            onError: () => {
-                toastr.error("Произошла ошибка. Обновите страницу и попробуйте снова");
-            }
+            url: environment.game.savepgn + "?pgn=" + Game.game.pgn() + "&moves=" + Game.game.history().length
+        }).then(() => {
+            toastr.error("Произошла ошибка. Обновите страницу и попробуйте снова");
         });
     }
 
@@ -138,14 +134,14 @@ export class Game {
 
         send({
             method: "GET",
-            url: environment.game.vote + "?from=" + from + "&to=" + to + "&moves=" + Game.movesLength,
-            onSuccess: () => {
+            url: environment.game.vote + "?from=" + from + "&to=" + to + "&moves=" + Game.movesLength
+        }).then(
+            () => {
                 (document.querySelector(".cancelVote") as HTMLElement).style.display = '';
             },
-            onError: () => {
+            () => {
                 toastr.warning("Произошла ошибка. Обновите страницу и попробуйте снова (код 4)");
-            }
-        });
+            });
     }
 
     /**
