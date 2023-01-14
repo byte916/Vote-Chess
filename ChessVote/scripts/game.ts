@@ -7,7 +7,9 @@ declare var Chessboard;
 const Chess = require('chess.js');
 
 export class Game {
-    static getGameStatTimer = null;
+    static getGameStateTimer = null;
+    static isGameRunning = false;
+
     static game;
     static userColor;
     static isMaster = false;
@@ -15,8 +17,9 @@ export class Game {
     
     /**Создать игру */
     public static start(color: string) {
-        if (Game.getGameStatTimer != null) return;
-        Game.getGameStatTimer = setInterval(Game.getGameState, 1000);
+        if (Game.isGameRunning) return;
+        Game.isGameRunning = true;
+        Game.getGameState();
         Game.userColor = color == 'b' ? 'black' : 'white';
         Game.game = new Chess();
         Game.SavePgn();
@@ -26,8 +29,9 @@ export class Game {
 
     /**Продолжить собственную игру */
     public static continue(color: string) {
-        if (Game.getGameStatTimer != null) return;
-        Game.getGameStatTimer = setInterval(Game.getGameState, 1000);
+        if (Game.isGameRunning) return;
+        Game.isGameRunning = true;
+        Game.getGameState();
         Game.userColor = color == 'b' ? 'black' : 'white';
 
         send({
@@ -45,8 +49,9 @@ export class Game {
 
     /**Присоединиться к игре */
     public static join(pgn: string, color: string) {
-        if (Game.getGameStatTimer != null) return;
-        Game.getGameStatTimer = setInterval(Game.getGameState, 1000);
+        if (Game.isGameRunning) return;
+        Game.isGameRunning = true;
+        Game.getGameState();
 
         Game.userColor = color == 'black' ? 'black' : 'white';
         Game.isMaster = false;
@@ -71,11 +76,14 @@ export class Game {
             (document.querySelector(".cancelVote") as HTMLElement).style.display = '';
         });
     }
-    
+
+    /**Выйти из игры*/
     public static exit() {
-        if (Game.getGameStatTimer != null) {
-            clearInterval(Game.getGameStatTimer);
-            Game.getGameStatTimer = null;
+        if (!Game.isGameRunning) return;
+        Game.isGameRunning = false;
+        if (Game.getGameStateTimer != null) {
+            clearTimeout(Game.getGameStateTimer);
+            Game.getGameStateTimer = null;
         }
     }
 
@@ -112,6 +120,8 @@ export class Game {
                     (document.querySelector(".cancelVote") as HTMLElement).style.display = 'none';
                 });
             }
+
+            if (Game.isGameRunning) Game.getGameStateTimer = setTimeout(Game.getGameState, 300);
         });
     }
 

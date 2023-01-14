@@ -9,8 +9,6 @@ declare var state: number;
 declare var color: string;
 
 documentReady(() => {
-    (document.querySelector(".finishVote") as HTMLElement).style.display = 'none';
-
     // В зависимости от текущего состояния переходим в соответствующий режим
     switch (state) {
     case 0:

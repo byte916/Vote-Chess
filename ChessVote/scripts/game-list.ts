@@ -6,7 +6,7 @@ import { environment } from './environment'
 export class GameList {
 /**Таймер получения списка игр */
     static getGameListTimer = null;
-
+    static isGameListUpdate = false;
     /**Список игр */
     static games: string[] = [];
 
@@ -17,17 +17,17 @@ export class GameList {
         table.innerHTML = "";
         GameList.games.length = 0;
         GameList.games = [];
-        // Каждую секунду получаем список игр
-        GameList.getGameListTimer = setInterval(() => {
-            new GameList().getGameList();
-        }, 1000);
+        // Запускаем получение списка игр. Функция будет вызывать себя с периодичностью
+        GameList.isGameListUpdate = true;
+        new GameList().getGameList();
     }
 
     public static stopUpdate() {
-        if (GameList.getGameListTimer != null) {
-            clearInterval(GameList.getGameListTimer);
-            GameList.getGameListTimer = null;
-        }
+        if (!GameList.isGameListUpdate) return;
+
+        GameList.isGameListUpdate = false;
+        clearInterval(GameList.getGameListTimer);
+        GameList.getGameListTimer = null;
     }
 
     private getGameList() {
@@ -50,6 +50,12 @@ export class GameList {
                     GameList.games.splice(j, 1);
                     j--;
                 }
+            }
+            /**Запускаем таймер для следующего запроса списка игр*/
+            if (GameList.isGameListUpdate) {
+                GameList.getGameListTimer = setTimeout(() => {
+                    this.getGameList();
+                }, 300);
             }
         });
     }
