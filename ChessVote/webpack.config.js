@@ -20,6 +20,7 @@
             entry: {
                 site: [
                     "./node_modules/jquery/dist/jquery.js",
+                    "./wwwroot/fomantic/semantic.js",
                     "./node_modules/toastr/build/toastr.min.css",
                     "./node_modules/@chrisoakman/chessboardjs/dist/chessboard-1.0.0.js",
                     "./node_modules/chess.js/chess.js",

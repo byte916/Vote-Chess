@@ -10,3 +10,5 @@ ChessVote/scripts/*.js
 ChessVote/scripts/*.js.map
 ChessVote/wwwroot/site/
 ChessVote/wwwroot/site.css
+ChessVote/keys/
+ChessVote/Properties/PublishProfiles/

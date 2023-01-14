@@ -16,6 +16,10 @@ namespace ChessVote.Controllers
         }
         public IActionResult Index()
         {
+            if (!Directory.Exists("keys"))
+            {
+                Directory.CreateDirectory("keys");
+            }
             var userHelper = new UserHelper(HttpContext, _db);
             ViewData["UserName"] = userHelper.GetUser.Name;
             var state = new GameHelper(_db).GetState(userHelper.GetUser.Name);

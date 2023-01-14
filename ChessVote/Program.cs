@@ -1,5 +1,6 @@
 ﻿using ChessVote.CvDb;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,10 @@ builder.Services.AddAuthentication(options =>
         options.ClientId = "vote_chess";
         options.ClientSecret = "lip_WQQ5VYSSu4GPlW736D3S";
     });
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("keys"))
+    .SetApplicationName("ChessVote")
+    .SetDefaultKeyLifetime(TimeSpan.FromDays(90));
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<CvDbContext>(options => options.UseSqlServer(connectionString));

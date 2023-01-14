@@ -11,6 +11,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VoteChess</title>
     <link rel="stylesheet" href="fomantic/semantic.min.css" />
+    <script src="fomantic/jquery.min.js"></script>
+    <script src="fomantic/semantic.js"></script>
 </head>
 <body style="background-color: #d2d6de">
 <div class="ui middle aligned center aligned grid" style="height: 100%">
@@ -28,6 +30,16 @@
         </form>
     </div>
 </div>
+
+<div class="ui tiny modal">
+    <div class="header" style="">Обратная связь</div>
+    <div class="content">
+        Сообщения об ошибках, пожелания и предложения вы можете направлять по почте <a href="mailto:byte916@yandex.ru">byte916@yandex.ru</a> или через <a href="https://vk.com/id2962981" target="_blank">ВКонтакте</a>
+    </div>
+</div>
+<a style="position: absolute; bottom: 0; right: 0" href="#" onclick="$('.ui.modal').modal('show');" class="ui tertiary big icon  button contacts">
+    <i class="envelope icon"></i>
+</a>
 <!-- Yandex.Metrika counter -->
 <script type="text/javascript" >
     (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};

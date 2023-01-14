@@ -96,22 +96,16 @@
         </div>
     </div>
 </div>
-<div style="position: fixed;bottom: 10px;right: 0;left: 0; text-align: center">
-    <a href="http://chess-vote.reformal.ru" onclick="Reformal.widgetOpen();return false;" onmouseover="Reformal.widgetPreload();">Oтзывы и предложения</a></div>
-<script type="text/javascript">
-    var reformalOptions = {
-        project_id: 985896,
-        show_tab: false,
-        project_host: "chess-vote.reformal.ru"
-    };
-    
-    (function() {
-        var script = document.createElement('script');
-        script.type = 'text/javascript'; script.async = true;
-        script.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'media.reformal.ru/widgets/v3/reformal.js';
-        document.getElementsByTagName('head')[0].appendChild(script);
-    })();
-</script><noscript><a href="http://reformal.ru"><img src="http://media.reformal.ru/reformal.png" /></a><a href="http://chess-vote.reformal.ru">Oтзывы и предложения для Chess Vote</a></noscript>
+<div class="ui tiny modal">
+    <div class="header" style="">Обратная связь</div>
+    <div class="content">
+        Сообщения об ошибках, пожелания и предложения вы можете направлять по почте <a href="mailto:byte916@yandex.ru">byte916@yandex.ru</a> или через <a href="https://vk.com/id2962981" target="_blank">ВКонтакте</a>
+    </div>
+</div>
+<a style="position: absolute; bottom: 0; right: 0" href="#" onclick="$('.ui.modal').modal('show');" class="ui tertiary big icon  button contacts">
+    <i class="envelope icon"></i>
+</a>
+
 <!-- Yandex.Metrika counter -->
 <script type="text/javascript" >
     (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
