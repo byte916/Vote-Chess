@@ -43,12 +43,12 @@ documentReady(() => {
 
 /**Нажатие на кнопку Создать новую игру */
 function onGameCreateClick(color: string) {
+    GameList.stopUpdate();
     send({
         method: "GET",
         url: environment.game.create + "?color=" + color,
     }).then(() => {
         SwitchScreen.toMasterGame();
-        GameList.stopUpdate();
         Game.start(color);
     });
 }
@@ -86,6 +86,9 @@ export function onGameExitClick() {
         return;
     }
     if (!confirm("Точно выйти?")) return;
+
+    Game.exit();
+
     send({
         method: "GET",
         url: environment.game.exit
@@ -96,12 +99,12 @@ export function onGameExitClick() {
 }
 
 export function onJoinToGameClick(name: string) {
+    GameList.stopUpdate();
     send({
         method: "get",
         url: environment.game.join + "?id=" + name
     }).then((data: { pgn: string, color: string }) => {
         SwitchScreen.toSlaveGame();
-        GameList.stopUpdate();
         Game.join(data.pgn, data.color);
     }, () => {
         toastr.warning("Произошла ошибка (код ошибки 1)");
@@ -110,12 +113,12 @@ export function onJoinToGameClick(name: string) {
 
 /**Переподключиться к чужой игре (после восстановления связи) */
 function onRejoinToGame() {
+    GameList.stopUpdate();
     send({
         method: "get",
         url: environment.game.rejoin
     }).then((data: { pgn: string, color: string }) => {
         SwitchScreen.toSlaveGame();
-        GameList.stopUpdate();
         Game.join(data.pgn, data.color);
     }, () => {
         toastr.warning("Произошла ошибка (код ошибки 1)");

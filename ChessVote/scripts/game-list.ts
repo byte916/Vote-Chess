@@ -26,7 +26,7 @@ export class GameList {
         if (!GameList.isGameListUpdate) return;
 
         GameList.isGameListUpdate = false;
-        clearInterval(GameList.getGameListTimer);
+        clearTimeout(GameList.getGameListTimer);
         GameList.getGameListTimer = null;
     }
 

@@ -129,7 +129,7 @@ export class Game {
         send({
             method: "GET",
             url: environment.game.savepgn + "?pgn=" + Game.game.pgn() + "&moves=" + Game.game.history().length
-        }).then(() => {
+        }).then(() => { }, () => {
             toastr.error("Произошла ошибка. Обновите страницу и попробуйте снова");
         });
     }
