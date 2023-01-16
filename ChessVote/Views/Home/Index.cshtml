@@ -33,6 +33,31 @@
         #game-list td {
             font-size: 1.1em; padding-left: 1.2em;
         }
+
+        .board-zone{
+            margin: 0 auto; 
+            width: 660px; 
+            position: relative; 
+            left: 75px;
+        }
+
+        .participants .active{
+            background-color: #AFA;
+        }
+
+        .participants .list{
+            text-align: left;
+            margin-left: 5px;
+        }
+
+        @@media (max-width: 810px){
+            .board-zone{
+                margin: 0 auto; 
+                width: 660px; 
+                position: relative; 
+                left: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -69,7 +94,14 @@
 </div>
 @* Экран создателя игры *@
 <div id="game-master" class="ui vertical basic padded center aligned segment">
-    <div id="board-master" style="width: 500px; margin: 0 auto"></div>
+    <div class="board-zone">
+        <div id="board-master" style="width: 500px; display: inline-block;"></div>
+        <div class="participants" style="width: 150px; display: inline-block; vertical-align: top">
+            <div class="header">Участники</div>
+            <div class="list">
+            </div>
+        </div>
+    </div>
     <div style="width: 500px; margin: 20px auto; text-align: left">
         <div style="display: inline-block; margin-top: -3px;">
             <span class="vote_counter"></span><br/>
@@ -83,8 +115,14 @@
 </div>
 @* Экран участника игры *@
 <div id="game-slave" class="ui vertical basic padded center aligned segment">
-    <div id="board-slave" style="width: 500px; margin: 0 auto"></div>
-    
+    <div class="board-zone">
+        <div id="board-slave" style="width: 500px; display: inline-block;"></div>
+        <div class="participants" style="width: 150px; display: inline-block; vertical-align: top">
+            <div class="header">Участники</div>
+            <div class="list">
+            </div>
+        </div>
+    </div>
     <div style="width: 500px; margin: 20px auto; text-align: left">
         <div style="display: inline-block; margin-top: -3px">
             <span class="vote_counter"></span><br/>
