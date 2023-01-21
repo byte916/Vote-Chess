@@ -19,7 +19,7 @@ documentReady(() => {
     case 1:
         // В собственной игре
         SwitchScreen.toMasterGame();
-        Game.continue(color);
+            Game.continueGame(color);
         break;
     case 2:
         // Присоединённый к игре

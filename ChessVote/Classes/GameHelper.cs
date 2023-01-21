@@ -64,8 +64,8 @@ namespace ChessVote.Classes
             {
                 result.status = GameStatus.Owner;
                 result.moves = currentGame.Moves;
-                result.votes = currentGame.Votes.Count(v => v.Move == result.moves);
-                result.online = currentGame.Participants.Count(p => p.Online > DateTime.Now.AddSeconds(-5));
+                result.votes = currentGame.Votes.Where(v => v.Move == result.moves).Select(v=>v.UserName).ToList();
+                result.online = currentGame.Participants.Where(p => p.Online > DateTime.Now.AddSeconds(-5)).Select(p => p.Name).ToList();
             }
             else
             {
@@ -78,14 +78,16 @@ namespace ChessVote.Classes
                 {
                     result.status = GameStatus.Joined;
                     result.moves = currentUser.Game.Moves;
-                    result.votes = currentUser.Game.Votes.Count(v => v.Move == result.moves);
-                    result.online = currentUser.Game.Participants.Count(g=>g.Online > DateTime.Now.AddSeconds(-5));
+                    result.votes = currentUser.Game.Votes.Where(v => v.Move == result.moves).Select(v => v.UserName).ToList();
+                    result.online = currentUser.Game.Participants.Where(g=>g.Online > DateTime.Now.AddSeconds(-5)).Select(p=>p.Name).ToList();
                 }
                 else
                 {
                     result.status = GameStatus.None;
                 }
             }
+
+            result.online.RemoveAll(o => result.votes.IndexOf(o) != -1);
 
             return result;
         }
@@ -264,8 +266,3 @@ namespace ChessVote.Classes
         }
     }
 }
-
-/*
- *Выводить число игроков в игре
- * Разрешить выбор цвета
- */

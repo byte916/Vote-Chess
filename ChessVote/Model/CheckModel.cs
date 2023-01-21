@@ -10,10 +10,10 @@ namespace ChessVote.Model
         /// <summary> Количество сделанных ходов в игре </summary>
         public int moves { get; set; }
 
-        /// <summary> Количество голосов в игре </summary>
-        public int votes { get; set; }
+        /// <summary> Список проголосовавших людей </summary>
+        public List<string> votes { get; set; }
 
-        /// <summary> Количество людей Онлайн </summary>
-        public int online { get; set; }
+        /// <summary> Список людей онлайн, которые не проголосовали </summary>
+        public List<string> online { get; set; }
     }
 }
