@@ -124,7 +124,7 @@ export class Game {
             board.querySelector(".online_counter").innerHTML = "В игре: " + (data.online.length + data.votes.length);
 
             var playerList = board.querySelector('.participants .list');
-            var newPlayers = [];
+            var newPlayers: { name: string, isVoted: boolean, html: HTMLDivElement }[] = [];
 
             // Проходим по закешированному списку проголосовавших и не проголосовавших
             // Все изменения отображаем на странице
@@ -170,13 +170,20 @@ export class Game {
                 player.isVoted = true;
                 player.html.classList.add('active');
             }
-
+            for (var i = 0; i < Game.players.length; i++) {
+                if (newPlayers.some(np => np.name == Game.players[i].name)) continue;
+                Game.players[i].html.remove();
+            }
             Game.players = newPlayers;
 
             if (Game.isMaster && data.votes != null && data.votes.length > 0) {
                 (document.querySelector(".finishVote") as HTMLElement).style.display = '';
             }
-            if (Game.isMaster) return;
+            if (Game.isMaster) {
+                if (Game.isGameRunning) Game.getGameStateTimer = setTimeout(Game.getGameState, 300);
+                return;
+            }
+
             if (Game.movesLength != data.moves) {
                 send({
                     method: "GET",

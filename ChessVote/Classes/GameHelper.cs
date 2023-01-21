@@ -86,6 +86,7 @@ namespace ChessVote.Classes
                     result.status = GameStatus.None;
                 }
             }
+            if (result.status == GameStatus.None) return result;
 
             result.online.RemoveAll(o => result.votes.IndexOf(o) != -1);
 
