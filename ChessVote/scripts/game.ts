@@ -203,6 +203,38 @@ export class Game {
         });
     }
 
+    /**Подсветить последние ходы */
+    static makeCellsHighlighted() {
+        var board: HTMLDivElement;
+        if (Game.isMaster) {
+            board = document.querySelector('#game-master');
+        } else {
+            board = document.querySelector('#game-slave');
+        }
+
+        board.querySelectorAll('.highlight-white').forEach(e => e.classList.remove('highlight-white'));
+        board.querySelectorAll('.highlight-black').forEach(e => e.classList.remove('highlight-black'));
+
+        var history = Game.game.history({ verbose: true });
+        console.log(history);
+        if (history.length > 2) {
+            var move = history[history.length - 2];
+            Game.makeMoveHighlighted(move, board);
+        }
+
+        // Берем последние два хода
+        if (history.length > 1) {
+            var move = history[history.length - 1];
+            Game.makeMoveHighlighted(move, board);
+        }
+    }
+    /**Подсветить указанную ячейку */
+    static makeMoveHighlighted(move, board) {
+        var className = move.color == 'w' ? 'highlight-white' : 'highlight-black';
+        board.querySelector('.square-' + move.from).classList.add(className);
+        board.querySelector('.square-' + move.to).classList.add(className);
+    }
+
     static SavePgn() {
         send({
             method: "GET",
@@ -214,6 +246,7 @@ export class Game {
 
     /**Сделать ход (добавить в голосование, либо выполнить ход и сохранить PGN) */
     static Move(from, to) {
+        Game.makeCellsHighlighted();
         if (Game.isMaster) {
             Game.SavePgn();
             (document.querySelector(".finishVote") as HTMLElement).style.display = '';
@@ -242,7 +275,6 @@ export class Game {
         Board.setPosition(Game.game.fen());
         Game.SavePgn();
         (document.querySelector(".finishVote") as HTMLElement).style.display = 'none';
-
     }
 }
 
@@ -258,12 +290,14 @@ export class Board {
             onDrop: Board.onDrop,
             onSnapEnd: Board.onSnapEnd
         });
+        Game.makeCellsHighlighted();
     }
 
     board = null;
 
     static setPosition(fen: string) {
         Board.board.position(fen);
+        Game.makeCellsHighlighted();
     }
     
     static onDragStart(source, piece, position, orientation) {
@@ -298,6 +332,7 @@ export class Board {
     // for castling, en passant, pawn promotion
     static onSnapEnd() {
         Board.board.position(Game.game.fen());
+        Game.makeCellsHighlighted();
     }
 }
 
