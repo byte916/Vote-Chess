@@ -212,27 +212,15 @@ export class Game {
             board = document.querySelector('#game-slave');
         }
 
-        board.querySelectorAll('.highlight-white').forEach(e => e.classList.remove('highlight-white'));
-        board.querySelectorAll('.highlight-black').forEach(e => e.classList.remove('highlight-black'));
+        board.querySelectorAll('.highlight-last-move').forEach(e => e.classList.remove('highlight-last-move'));
 
         var history = Game.game.history({ verbose: true });
         console.log(history);
-        if (history.length > 2) {
-            var move = history[history.length - 2];
-            Game.makeMoveHighlighted(move, board);
-        }
-
-        // Берем последние два хода
         if (history.length > 1) {
             var move = history[history.length - 1];
-            Game.makeMoveHighlighted(move, board);
+            board.querySelector('.square-' + move.from).classList.add('highlight-last-move');
+            board.querySelector('.square-' + move.to).classList.add('highlight-last-move');
         }
-    }
-    /**Подсветить указанную ячейку */
-    static makeMoveHighlighted(move, board) {
-        var className = move.color == 'w' ? 'highlight-white' : 'highlight-black';
-        board.querySelector('.square-' + move.from).classList.add(className);
-        board.querySelector('.square-' + move.to).classList.add(className);
     }
 
     static SavePgn() {
