@@ -7,41 +7,37 @@ declare var Chessboard;
 const Chess = require('chess.js');
 
 export class Game {
-    static getGameStateTimer = null;
-    static isGameRunning = false;
+    private static getGameStateTimer = null;
+    private static isGameRunning = false;
 
-    static game;
-    static userColor;
-    static isMaster = false;
-    static movesLength;
+    /** Объект текущей игры */
+    public static game;
 
-    static inGame: { name: string, isActive: boolean }[] = [];
+    /** Является ли текущий игрок создателем игры */
+    public static isMaster = false;
+    private static movesLength;
 
     /** Присоединившиеся игроки */
-    static players: { name: string, isVoted: boolean, html: HTMLDivElement }[] = [];
+    private static players: { name: string, isVoted: boolean, html: HTMLDivElement }[] = [];
     
     /**Создать игру */
     public static start(color: string) {
         if (Game.isGameRunning) return;
-        Game.inGame.length = 0;
-        Game.inGame = [];
         Game.isGameRunning = true;
         Game.getGameState();
-        Game.userColor = color == 'b' ? 'black' : 'white';
+        color == 'b' ? 'black' : 'white';
         Game.game = new Chess();
         Game.SavePgn();
         Game.isMaster = true;
-        Board.init("board-master");
+        Board.init("board-master", color);
     }
 
     /**Продолжить собственную игру */
     public static continueGame(color: string) {
         if (Game.isGameRunning) return;
-        Game.inGame.length = 0;
-        Game.inGame = [];
         Game.isGameRunning = true;
         Game.getGameState();
-        Game.userColor = color == 'b' ? 'black' : 'white';
+        color == 'b' ? 'black' : 'white';
 
         send({
             method: "GET",
@@ -52,26 +48,24 @@ export class Game {
                 Game.game.load_pgn(data.pgn);
             }
             Game.isMaster = true;
-            Board.init("board-master");
+            Board.init("board-master", color);
         });
     }
 
     /**Присоединиться к игре */
     public static join(pgn: string, color: string) {
         if (Game.isGameRunning) return;
-        Game.inGame.length = 0;
-        Game.inGame = [];
         Game.isGameRunning = true;
         Game.getGameState();
 
-        Game.userColor = color == 'black' ? 'black' : 'white';
+        color == 'black' ? 'black' : 'white';
         Game.isMaster = false;
         Game.game = new Chess();
         if (pgn != 'start') Game.game.load_pgn(pgn);
         (document.querySelector(".cancelVote") as HTMLElement).style.display = 'none';
         Game.RestoreVote();
         Game.movesLength = Game.game.history().length;
-        Board.init("board-slave");
+        Board.init("board-slave", color);
     }
 
     /**Восстановить голос (после обновления страницы) */
@@ -203,7 +197,7 @@ export class Game {
         });
     }
 
-    static SavePgn() {
+    private static SavePgn() {
         send({
             method: "GET",
             url: environment.game.savepgn + "?pgn=" + Game.game.pgn() + "&moves=" + Game.game.history().length
@@ -213,7 +207,7 @@ export class Game {
     }
 
     /**Сделать ход (добавить в голосование, либо выполнить ход и сохранить PGN) */
-    static Move(from, to) {
+    public static Move(from, to) {
         Board.makeCellsHighlighted();
         if (Game.isMaster) {
             Game.SavePgn();
@@ -238,7 +232,7 @@ export class Game {
      * @param from
      * @param to
      */
-    static FinishVote(from, to) {
+    public static FinishVote(from, to) {
         Game.game.move({ from: from, to: to });
         Board.setPosition(Game.game.fen());
         Game.SavePgn();
@@ -252,12 +246,13 @@ export class Board {
 
     /**
      * Инициализация игровой доски
-     * @param htmlElementId HTML-селектор
+     * @param htmlElementId id html-элемента, где будет доска
+     * @param color цвет - black или white
      */
-    static init(htmlElementId: string) {
+    public static init(htmlElementId: string, color: string) {
         Board.board = Chessboard(htmlElementId, {
             position: Game.game.fen(),
-            orientation: Game.userColor,
+            orientation: color,
             draggable: true,
             onDragStart: Board.onDragStart,
             onDrop: Board.onDrop,
@@ -287,8 +282,8 @@ export class Board {
             return false
         }
 
-        if ((Game.game.turn() === 'w' && Game.userColor == 'black') ||
-            (Game.game.turn() === 'b' && Game.userColor == 'white'))
+        if ((Game.game.turn() === 'w' && Board.board.orientation() == 'black') ||
+            (Game.game.turn() === 'b' && Board.board.orientation() == 'white'))
             return false;
     }
 
