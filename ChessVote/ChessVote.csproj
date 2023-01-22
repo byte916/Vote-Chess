@@ -4,7 +4,17 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+	<TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="keys\**" />
+    <Content Remove="keys\**" />
+    <EmbeddedResource Remove="keys\**" />
+    <None Remove="keys\**" />
+    <TypeScriptCompile Remove="keys\**" />
+    <TypeScriptCompile Remove="node_modules\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="scripts\main.ts" />
@@ -20,10 +30,6 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.6">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.7.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

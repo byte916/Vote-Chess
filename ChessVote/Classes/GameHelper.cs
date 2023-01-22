@@ -74,7 +74,7 @@ namespace ChessVote.Classes
                     .Include(u => u.Game.Participants)
                     .FirstOrDefault(u => u.Name == name);
 
-                if (currentUser != null && currentUser.GameId != null && currentUser.Game.IsInProgress)
+                if (currentUser != null && currentUser.Game != null && currentUser.Game.IsInProgress)
                 {
                     result.status = GameStatus.Joined;
                     result.moves = currentUser.Game.Moves;
