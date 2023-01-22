@@ -3,12 +3,18 @@ import { environment } from './environment';
 import { SwitchScreen } from './main';
 import { GameList } from './game-list';
 import * as toastr from 'toastr';
+import { VotedList } from './components/fillVotedList';
 declare var Chessboard;
 const Chess = require('chess.js');
 
 export class Game {
     private static getGameStateTimer = null;
+
+    /** Является ли игрок в игре */
     private static isGameRunning = false;
+
+    // Как часть получать состояние игры (в мс)
+    private static checkStateInterval = 300;
 
     /** Объект текущей игры */
     public static game;
@@ -19,19 +25,17 @@ export class Game {
 
     /** Является ли текущий ход моим */
     public static isMyTurn = false;
-
-    /** Присоединившиеся игроки */
-    private static players: { name: string, isVoted: boolean, html: HTMLDivElement }[] = [];
     
     /**Создать игру */
     public static start(color: string) {
         if (Game.isGameRunning) return;
         Game.isGameRunning = true;
+        Game.isMaster = true;
+
         Game.getGameState();
         color == 'b' ? 'black' : 'white';
         Game.game = new Chess();
         Game.SavePgn();
-        Game.isMaster = true;
         Board.init("board-master", color);
     }
 
@@ -98,6 +102,7 @@ export class Game {
 
     /**Получить состояние игры */
     public static getGameState() {
+        if (!Game.isGameRunning) return;
         send({
             method: "GET",
             url: environment.game.check
@@ -110,79 +115,20 @@ export class Game {
                 return;
             }
 
-            var board: HTMLDivElement;
-            if (Game.isMaster) {
-                board = document.querySelector('#game-master');
-            } else {
-                board = document.querySelector('#game-slave');
-            }
+            // Заполняем список проголосовавших людей
+            VotedList.Fill(data.votes, data.online, Board.wrapper);
 
-            // Заполняем список проголосовавших и людей в игре
-            board.querySelector(".vote_counter").innerHTML = "Проголосовало: " + data.votes.length;
-            board.querySelector(".online_counter").innerHTML = "В игре: " + (data.online.length + data.votes.length);
-
-            var playerList = board.querySelector('.participants .list');
-            var newPlayers: { name: string, isVoted: boolean, html: HTMLDivElement }[] = [];
-
-            // Проходим по закешированному списку проголосовавших и не проголосовавших
-            // Все изменения отображаем на странице
-            for (var i = 0; i < data.online.length; i++) {
-                let players = Game.players.filter(p => p.name == data.online[i]);
-                if (players.length == 0) {
-                    var html = document.createElement('div');
-                    html.innerText = data.online[i];
-                    newPlayers.push({
-                        name: data.online[i],
-                        isVoted: false,
-                        html: html
-                    });
-                    playerList.append(html);
-                    continue;
-                }
-
-                let player = players[0];
-                newPlayers.push(player);
-                if (!player.isVoted) continue;
-                player.isVoted = false;
-                player.html.classList.remove('active');
-            }
-
-            for (var i = 0; i < data.votes.length; i++) {
-                let players = Game.players.filter(p => p.name == data.votes[i]);
-                if (players.length == 0) {
-                    var html = document.createElement('div');
-                    html.classList.add('active');
-                    html.innerText = data.votes[i];
-                    newPlayers.push({
-                        name: data.votes[i],
-                        isVoted: true,
-                        html: html
-                    });
-                    playerList.append(html);
-                    continue;
-                }
-
-                let player = players[0];
-                newPlayers.push(player);
-                if (player.isVoted) continue;
-                player.isVoted = true;
-                player.html.classList.add('active');
-            }
-            for (var i = 0; i < Game.players.length; i++) {
-                if (newPlayers.some(np => np.name == Game.players[i].name)) continue;
-                Game.players[i].html.remove();
-            }
-            Game.players = newPlayers;
-
+            // У мастера показывать кнопку "Завершить голосование" если есть проголосовавшие
             if (Game.isMaster && data.votes != null && data.votes.length > 0) {
                 (document.querySelector(".finishVote") as HTMLElement).style.display = '';
             }
+            // Если это мастер, то выходим здесь предварительно установив таймер для слеудющего получения состояния игры
             if (Game.isMaster) {
-                if (Game.isGameRunning) Game.getGameStateTimer = setTimeout(Game.getGameState, 300);
+                Game.getGameStateTimer = setTimeout(Game.getGameState, Game.checkStateInterval);
                 return;
             }
 
-            // Если в игре изменилось количество ходов (мастер сделал ход)
+            // Если в игре изменилось количество ходов (мастер сделал ход), то получаем 
             if (Game.movesLength != data.moves) {
                 send({
                     method: "GET",
@@ -196,10 +142,13 @@ export class Game {
                     Game.movesLength = data.moves;
                     (document.querySelector(".cancelVote") as HTMLElement).style.display = 'none';
                     Game.UpdateExtraButtons();
+
+                    Game.getGameStateTimer = setTimeout(Game.getGameState, Game.checkStateInterval);
                 });
+                return;
             }
 
-            if (Game.isGameRunning) Game.getGameStateTimer = setTimeout(Game.getGameState, 300);
+            Game.getGameStateTimer = setTimeout(Game.getGameState, Game.checkStateInterval);
         });
     }
 
@@ -287,6 +236,8 @@ export class Game {
 export class Board {
     public static board;
 
+    public static wrapper: HTMLDivElement;
+
     /**
      * Инициализация игровой доски
      * @param htmlElementId id html-элемента, где будет доска
@@ -301,6 +252,11 @@ export class Board {
             onDrop: Board.onDrop,
             onSnapEnd: Board.onSnapEnd
         });
+        if (Game.isMaster) {
+            Board.wrapper = document.querySelector('#game-master');
+        } else {
+            Board.wrapper = document.querySelector('#game-slave');
+        }
         Board.makeCellsHighlighted();
         Game.UpdateExtraButtons();
     }

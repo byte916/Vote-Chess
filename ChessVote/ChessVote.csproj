@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="scripts\components\fillVotedList.ts" />
     <None Remove="scripts\main.ts" />
   </ItemGroup>
 
@@ -36,6 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Include="scripts\components\fillVotedList.ts" />
     <TypeScriptCompile Include="scripts\main.ts" />
   </ItemGroup>
 
