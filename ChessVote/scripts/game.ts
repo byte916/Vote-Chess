@@ -17,6 +17,9 @@ export class Game {
     public static isMaster = false;
     private static movesLength;
 
+    /** Является ли текущий ход моим */
+    public static isMyTurn = false;
+
     /** Присоединившиеся игроки */
     private static players: { name: string, isVoted: boolean, html: HTMLDivElement }[] = [];
     
@@ -63,9 +66,9 @@ export class Game {
         Game.game = new Chess();
         if (pgn != 'start') Game.game.load_pgn(pgn);
         (document.querySelector(".cancelVote") as HTMLElement).style.display = 'none';
+        Board.init("board-slave", color);
         Game.RestoreVote();
         Game.movesLength = Game.game.history().length;
-        Board.init("board-slave", color);
     }
 
     /**Восстановить голос (после обновления страницы) */
@@ -79,6 +82,7 @@ export class Game {
             Game.game.move({ from: data.from, to: data.to });
             Board.setPosition(Game.game.fen());
             (document.querySelector(".cancelVote") as HTMLElement).style.display = '';
+            Game.UpdateExtraButtons();
         });
     }
 
@@ -178,6 +182,7 @@ export class Game {
                 return;
             }
 
+            // Если в игре изменилось количество ходов (мастер сделал ход)
             if (Game.movesLength != data.moves) {
                 send({
                     method: "GET",
@@ -190,6 +195,7 @@ export class Game {
                     Board.setPosition(Game.game.fen());
                     Game.movesLength = data.moves;
                     (document.querySelector(".cancelVote") as HTMLElement).style.display = 'none';
+                    Game.UpdateExtraButtons();
                 });
             }
 
@@ -197,6 +203,7 @@ export class Game {
         });
     }
 
+    /**Сохранить PGN */
     private static SavePgn() {
         send({
             method: "GET",
@@ -212,6 +219,7 @@ export class Game {
         if (Game.isMaster) {
             Game.SavePgn();
             (document.querySelector(".finishVote") as HTMLElement).style.display = '';
+            Game.UpdateExtraButtons();
             return;
         }
 
@@ -221,10 +229,45 @@ export class Game {
         }).then(
             () => {
                 (document.querySelector(".cancelVote") as HTMLElement).style.display = '';
+                Game.UpdateExtraButtons();
             },
             () => {
                 toastr.warning("Произошла ошибка. Обновите страницу и попробуйте снова (код 4)");
             });
+    }
+
+    /**Обновить видимость дополнительных кнопок */
+    public static UpdateExtraButtons() {
+        if (Game.isMaster) {
+            var board = document.querySelector('#game-master');
+            var giveUpButton = board.querySelector('.giveUpVote') as HTMLElement;
+            var drawButton = board.querySelector('.drawVote') as HTMLElement;
+
+            if (Board.isCanMove()) {
+                giveUpButton.style.display = '';
+                drawButton.style.display = '';
+            } else {
+                giveUpButton.style.display = 'none';
+                drawButton.style.display = 'none';
+            }
+        } else {
+            var board = document.querySelector('#game-slave');
+            var giveUpButton = board.querySelector('.giveUpVote') as HTMLElement;
+            var drawButton = board.querySelector('.drawVote') as HTMLElement;
+
+            // Если наша очередь хода и мы можем еще двигаться, то разрешаем проголосовать за сдачу
+            if (Board.isCanMove()) {
+                giveUpButton.style.display = '';
+            } else {
+                giveUpButton.style.display = 'none';
+            }
+            // Если наша очередь хода, то можно проголосовать за ничью (независимо от того, походили или нет)
+            if (Board.isCanMove() || (document.querySelector(".cancelVote") as HTMLElement).style.display == '') {
+                drawButton.style.display = '';
+            } else {
+                drawButton.style.display = 'none';
+            }
+        }
     }
 
     /**
@@ -259,6 +302,7 @@ export class Board {
             onSnapEnd: Board.onSnapEnd
         });
         Board.makeCellsHighlighted();
+        Game.UpdateExtraButtons();
     }
 
     board = null;
@@ -270,6 +314,7 @@ export class Board {
     public static setPosition(fen: string) {
         Board.board.position(fen);
         Board.makeCellsHighlighted();
+        Game.UpdateExtraButtons();
     }
     
     private static onDragStart(source, piece, position, orientation) {
@@ -282,9 +327,13 @@ export class Board {
             return false
         }
 
-        if ((Game.game.turn() === 'w' && Board.board.orientation() == 'black') ||
-            (Game.game.turn() === 'b' && Board.board.orientation() == 'white'))
+        if (!Board.isCanMove())
             return false;
+    }
+
+    public static isCanMove() {
+        return (Game.game.turn() === 'w' && Board.board.orientation() == 'white') ||
+            (Game.game.turn() === 'b' && Board.board.orientation() == 'black');
     }
 
     private static onDrop(source, target) {
@@ -305,6 +354,7 @@ export class Board {
     private static onSnapEnd() {
         Board.board.position(Game.game.fen());
         Board.makeCellsHighlighted();
+        Game.UpdateExtraButtons();
     }
 
     /**Подсветить последние ходы */
@@ -325,6 +375,7 @@ export class Board {
             board.querySelector('.square-' + move.from).classList.add('highlight-last-move');
             board.querySelector('.square-' + move.to).classList.add('highlight-last-move');
         }
+        Game.isMyTurn = Board.isCanMove();
     }
 }
 
