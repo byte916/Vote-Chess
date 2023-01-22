@@ -203,26 +203,6 @@ export class Game {
         });
     }
 
-    /**Подсветить последние ходы */
-    static makeCellsHighlighted() {
-        var board: HTMLDivElement;
-        if (Game.isMaster) {
-            board = document.querySelector('#game-master');
-        } else {
-            board = document.querySelector('#game-slave');
-        }
-
-        board.querySelectorAll('.highlight-last-move').forEach(e => e.classList.remove('highlight-last-move'));
-
-        var history = Game.game.history({ verbose: true });
-        console.log(history);
-        if (history.length > 1) {
-            var move = history[history.length - 1];
-            board.querySelector('.square-' + move.from).classList.add('highlight-last-move');
-            board.querySelector('.square-' + move.to).classList.add('highlight-last-move');
-        }
-    }
-
     static SavePgn() {
         send({
             method: "GET",
@@ -234,7 +214,7 @@ export class Game {
 
     /**Сделать ход (добавить в голосование, либо выполнить ход и сохранить PGN) */
     static Move(from, to) {
-        Game.makeCellsHighlighted();
+        Board.makeCellsHighlighted();
         if (Game.isMaster) {
             Game.SavePgn();
             (document.querySelector(".finishVote") as HTMLElement).style.display = '';
@@ -266,9 +246,14 @@ export class Game {
     }
 }
 
+/**Игровая доска */
 export class Board {
     public static board;
 
+    /**
+     * Инициализация игровой доски
+     * @param htmlElementId HTML-селектор
+     */
     static init(htmlElementId: string) {
         Board.board = Chessboard(htmlElementId, {
             position: Game.game.fen(),
@@ -278,17 +263,21 @@ export class Board {
             onDrop: Board.onDrop,
             onSnapEnd: Board.onSnapEnd
         });
-        Game.makeCellsHighlighted();
+        Board.makeCellsHighlighted();
     }
 
     board = null;
 
-    static setPosition(fen: string) {
+    /**
+     * Установить позицию на доске из fen
+     * @param fen
+     */
+    public static setPosition(fen: string) {
         Board.board.position(fen);
-        Game.makeCellsHighlighted();
+        Board.makeCellsHighlighted();
     }
     
-    static onDragStart(source, piece, position, orientation) {
+    private static onDragStart(source, piece, position, orientation) {
         // do not pick up pieces if the game is over
         if (Game.game.game_over()) return false
 
@@ -303,7 +292,7 @@ export class Board {
             return false;
     }
 
-    static onDrop(source, target) {
+    private static onDrop(source, target) {
         // see if the move is legal
         var move = Game.game.move({
             from: source,
@@ -318,9 +307,29 @@ export class Board {
 
     // update the board position after the piece snap
     // for castling, en passant, pawn promotion
-    static onSnapEnd() {
+    private static onSnapEnd() {
         Board.board.position(Game.game.fen());
-        Game.makeCellsHighlighted();
+        Board.makeCellsHighlighted();
+    }
+
+    /**Подсветить последние ходы */
+    public static makeCellsHighlighted() {
+        var board: HTMLDivElement;
+        if (Game.isMaster) {
+            board = document.querySelector('#game-master');
+        } else {
+            board = document.querySelector('#game-slave');
+        }
+
+        board.querySelectorAll('.highlight-last-move').forEach(e => e.classList.remove('highlight-last-move'));
+
+        var history = Game.game.history({ verbose: true });
+
+        if (history.length > 1) {
+            var move = history[history.length - 1];
+            board.querySelector('.square-' + move.from).classList.add('highlight-last-move');
+            board.querySelector('.square-' + move.to).classList.add('highlight-last-move');
+        }
     }
 }
 
