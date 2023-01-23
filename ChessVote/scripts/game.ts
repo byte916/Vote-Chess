@@ -4,8 +4,10 @@ import { SwitchScreen } from './main';
 import { GameList } from './game-list';
 import * as toastr from 'toastr';
 import { VotedList } from './components/fillVotedList';
-declare var Chessboard;
-const Chess = require('chess.js');
+import { historyResult, IChessJS } from './interfaces/chessjs';
+import { IChessboardJS } from './interfaces/chessboardjs';
+declare var Chessboard: Function;
+const Chess: IChessJS = require('chess.js');
 
 export class Game {
     private static getGameStateTimer = null;
@@ -17,7 +19,7 @@ export class Game {
     private static checkStateInterval = 300;
 
     /** Объект текущей игры */
-    public static game;
+    public static game: IChessJS;
 
     /** Является ли текущий игрок создателем игры */
     public static isMaster = false;
@@ -234,7 +236,7 @@ export class Game {
 
 /**Игровая доска */
 export class Board {
-    public static board;
+    public static board: IChessboardJS;
 
     public static wrapper: HTMLDivElement;
 
@@ -324,7 +326,7 @@ export class Board {
 
         board.querySelectorAll('.highlight-last-move').forEach(e => e.classList.remove('highlight-last-move'));
 
-        var history = Game.game.history({ verbose: true });
+        var history = Game.game.history({ verbose: true }) as historyResult[];
 
         if (history.length > 1) {
             var move = history[history.length - 1];

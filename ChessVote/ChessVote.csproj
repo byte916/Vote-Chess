@@ -18,6 +18,8 @@
 
   <ItemGroup>
     <None Remove="scripts\components\fillVotedList.ts" />
+    <None Remove="scripts\interfaces\chessboardjs.ts" />
+    <None Remove="scripts\interfaces\chessjs.ts" />
     <None Remove="scripts\main.ts" />
   </ItemGroup>
 
@@ -38,6 +40,8 @@
 
   <ItemGroup>
     <TypeScriptCompile Include="scripts\components\fillVotedList.ts" />
+    <TypeScriptCompile Include="scripts\interfaces\chessboardjs.ts" />
+    <TypeScriptCompile Include="scripts\interfaces\chessjs.ts" />
     <TypeScriptCompile Include="scripts\main.ts" />
   </ItemGroup>
 
