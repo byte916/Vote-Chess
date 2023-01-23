@@ -25,14 +25,14 @@ namespace ChessVote.Classes
             if (currentGame != null)
             {
                 result.State = GameStatus.Owner;
-                result.Color = currentGame.Color == "black" ? "b" : "w";
+                result.Color = currentGame.Color;
                 return result;
             }
             var currentUser = _db.Users.Include(u=>u.Game).FirstOrDefault(u => u.Name == name);
             if (currentUser != null && currentUser.GameId != null && currentUser.Game.IsInProgress)
             {
                 result.State = GameStatus.Joined;
-                result.Color = currentUser.Game.Color == "black" ? "w" : "b";
+                result.Color = currentUser.Game.Color;
                 return result;
             }
 
@@ -111,7 +111,7 @@ namespace ChessVote.Classes
                 CreatorName = name,
                 IsInProgress = true,
                 PGN = "start",
-                Color = color == "b" ? "black" : "white"
+                Color = color
             };
             _db.Games.Add(currentGame);
             _db.SaveChanges();

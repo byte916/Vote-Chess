@@ -35,7 +35,6 @@ export class Game {
         Game.isMaster = true;
 
         Game.getGameState();
-        color == 'b' ? 'black' : 'white';
         Game.game = new Chess();
         Game.SavePgn();
         Board.init("board-master", color);
@@ -46,7 +45,6 @@ export class Game {
         if (Game.isGameRunning) return;
         Game.isGameRunning = true;
         Game.getGameState();
-        color == 'b' ? 'black' : 'white';
 
         send({
             method: "GET",
@@ -67,7 +65,6 @@ export class Game {
         Game.isGameRunning = true;
         Game.getGameState();
 
-        color == 'black' ? 'black' : 'white';
         Game.isMaster = false;
         Game.game = new Chess();
         if (pgn != 'start') Game.game.load_pgn(pgn);

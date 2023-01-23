@@ -19,7 +19,7 @@ documentReady(() => {
     case 1:
         // В собственной игре
         SwitchScreen.toMasterGame();
-            Game.continueGame(color);
+        Game.continueGame(color);
         break;
     case 2:
         // Присоединённый к игре
@@ -27,8 +27,8 @@ documentReady(() => {
         break;
     }
     // Нажатие на кнопку "Создать новую игру"
-    document.getElementById('btn_white_create_game').addEventListener('click', () => { onGameCreateClick("w") });
-    document.getElementById('btn_black_create_game').addEventListener('click', () => { onGameCreateClick("b") });
+    document.getElementById('btn_white_create_game').addEventListener('click', () => { onGameCreateClick("white") });
+    document.getElementById('btn_black_create_game').addEventListener('click', () => { onGameCreateClick("black") });
 
     document.querySelectorAll(".exit").forEach(element => {
         element.addEventListener('click', onGameExitClick);
