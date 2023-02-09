@@ -1,12 +1,13 @@
 ﻿import { send } from './common';
 import { environment } from './environment';
-import { SwitchScreen } from './main';
+import { onGameExitClick, SwitchScreen } from './main';
 import { GameList } from './game-list';
 import * as toastr from 'toastr';
 import { VotedList } from './components/fillVotedList';
 import { historyResult, IChessJS } from './interfaces/chessjs';
 import { IChessboardJS } from './interfaces/chessboardjs';
 declare var Chessboard: Function;
+declare var Fireworks;
 const Chess: IChessJS = require('chess.js');
 
 export class Game {
@@ -21,6 +22,8 @@ export class Game {
     /** Объект текущей игры */
     public static game: IChessJS;
 
+    public static gameIsFinished: boolean = false;
+
     /** Является ли текущий игрок создателем игры */
     public static isMaster = false;
     private static movesLength;
@@ -31,6 +34,7 @@ export class Game {
     /**Создать игру */
     public static start(color: string) {
         if (Game.isGameRunning) return;
+        Game.resetState();
         Game.isGameRunning = true;
         Game.isMaster = true;
 
@@ -43,6 +47,7 @@ export class Game {
     /**Продолжить собственную игру */
     public static continueGame(color: string) {
         if (Game.isGameRunning) return;
+        Game.resetState();
         Game.isGameRunning = true;
         Game.getGameState();
 
@@ -62,6 +67,7 @@ export class Game {
     /**Присоединиться к игре */
     public static join(pgn: string, color: string) {
         if (Game.isGameRunning) return;
+        Game.resetState();
         Game.isGameRunning = true;
         Game.getGameState();
 
@@ -97,6 +103,11 @@ export class Game {
             clearTimeout(Game.getGameStateTimer);
             Game.getGameStateTimer = null;
         }
+    }
+
+    /**При подключении сбрасываем состояние, которое могло быть изменено в прошлой игре */
+    private static resetState() {
+        document.querySelector('#game-slave .giveUpVote').classList.remove('green');
     }
 
     /**Получить состояние игры */
@@ -149,6 +160,91 @@ export class Game {
 
             Game.getGameStateTimer = setTimeout(Game.getGameState, Game.checkStateInterval);
         });
+    }
+
+    public static FinishGame() {
+        Game.gameIsFinished = true;
+        const body = document.querySelector('body');
+        var wrapperBc = document.createElement('div');
+        wrapperBc.style.position = 'fixed';
+        wrapperBc.style.top = '0px';
+        wrapperBc.style.bottom = '0px';
+        wrapperBc.style.left = '0px';
+        wrapperBc.style.right = '0px';
+        wrapperBc.id = 'fireworks-wrapper-bc';
+        wrapperBc.style.backgroundColor = '#000';
+        wrapperBc.style.opacity = '0.5';
+        wrapperBc.style.overflow = 'hidden';
+        body.appendChild(wrapperBc);
+
+        var wrapper = document.createElement('div');
+        wrapper.style.position = 'fixed';
+        wrapper.style.top = '0';
+        wrapper.style.bottom = '0';
+        wrapper.style.left = '0';
+        wrapper.style.right = '0';
+        wrapper.id = 'fireworks-wrapper';
+        body.appendChild(wrapper);
+
+        var header = document.createElement('div');
+        header.style.marginTop = '300px';
+        header.style.position = 'fixed';
+        header.style.top = '0';
+        header.style.bottom = '0';
+        header.style.left = '0';
+        header.style.right = '0';
+        header.style.fontSize = '32px';
+        header.style.textAlign = 'center';
+        header.textContent = 'ПОБЕДА';
+        header.style.textShadow = '#BFB 0px 0px 10px ,#BBF 0px 0px 15px,#FBB 0px 0px 20px,#DFD 0px 0px 30px,#DDF 0px 0px 40px, #FDD 0px 0px 50px';
+        body.appendChild(header);
+        wrapperBc.addEventListener('click', () => {
+            wrapperBc.remove();
+            wrapper.remove();
+            header.remove();
+            Game.exit();
+            SwitchScreen.toMain();
+
+            send({
+                method: "GET",
+                url: environment.game.exit
+            }).then(() => {
+                GameList.runUpdate();
+            });
+        });
+        header.addEventListener('click', () => {
+            wrapperBc.remove();
+            wrapper.remove();
+            header.remove();
+            Game.exit();
+            SwitchScreen.toMain();
+
+            send({
+                method: "GET",
+                url: environment.game.exit
+            }).then(() => {
+                GameList.runUpdate();
+            });
+        });
+        wrapper.addEventListener('click', () => {
+            wrapperBc.remove();
+            wrapper.remove();
+            header.remove();
+            Game.exit();
+            SwitchScreen.toMain();
+
+            send({
+                method: "GET",
+                url: environment.game.exit
+            }).then(() => {
+                GameList.runUpdate();
+            });
+        });
+        const fireworks = new Fireworks.default(wrapper, {
+            opacity: 0.1,
+            particles: 120
+        });
+        fireworks.start();
     }
 
     /**Сохранить PGN */
@@ -228,6 +324,21 @@ export class Game {
         Board.setPosition(Game.game.fen());
         Game.SavePgn();
         (document.querySelector(".finishVote") as HTMLElement).style.display = 'none';
+    }
+
+    public static VoteGiveUp() {
+        // Мастер сразу завершает игру
+        if (Game.isMaster) {
+            return;
+        }
+        send({ method: 'GET', url: environment.game.voteGiveUp + "?moves=" + Game.movesLength })
+            .then((result: boolean) => {
+                if (result) {
+                    document.querySelector('#game-slave .giveUpVote').classList.add('green');
+                } else {
+                    document.querySelector('#game-slave .giveUpVote').classList.remove('green');
+                }
+            })
     }
 }
 

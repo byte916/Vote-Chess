@@ -37,6 +37,11 @@ documentReady(() => {
     document.querySelector(".finishVote").addEventListener('click', onFinishVoteClick);
 
     document.querySelector(".cancelVote").addEventListener('click', onCancelVoteClick);
+
+    // Клик на кнопку Сдаться
+    document.querySelectorAll(".giveUpVote").forEach(element => {
+        element.addEventListener('click', onGiveUpClick);
+    })
 });
 
 
@@ -71,7 +76,11 @@ function onFinishVoteClick() {
     send({
         method: "GET",
         url: environment.game.finishvote
-    }).then((data: { result: string, from: string, to: string }) => {
+    }).then((data: { result: string, from: string, to: string, isDraw: boolean, isGiveUp: boolean }) => {
+        if (data.isGiveUp == true) {
+            Game.FinishGame();
+            return;
+        }
         if (data.result == '') {
             toastr.warning("Несколько ходов набрали равное количество голосов. Нужны новые голоса или чтобы кто-то переголосовал.");
             return;
@@ -81,7 +90,7 @@ function onFinishVoteClick() {
     });
 }
 
-/**Выйти из игры */
+/**Выйти из игры. При изменении этого кода не забыть изменить Game.FinishGame */
 export function onGameExitClick() {
     if (Game.isMaster && !confirm("Игра будет завершена")) {
         return;
@@ -124,6 +133,11 @@ function onRejoinToGame() {
     }, () => {
         toastr.warning("Произошла ошибка (код ошибки 1)");
     });
+}
+
+/**Клик на кнопку Сдаться */
+function onGiveUpClick() {
+    Game.VoteGiveUp();
 }
 
 

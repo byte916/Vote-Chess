@@ -18,6 +18,12 @@
         /// <summary> Ход куда </summary>
         public string To { get; set; }
 
+        /// <summary> Было ли голосование за сдачу </summary>
+        public bool GiveUp { get; set; }
+
+        /// <summary> Было ли голосование за ничью </summary>
+        public bool Draw { get; set; }
+
         public Game Game { get; set; }
 
         public User User { get; set; }

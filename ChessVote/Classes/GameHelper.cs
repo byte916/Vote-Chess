@@ -242,8 +242,26 @@ namespace ChessVote.Classes
             var game = _db.Games.Include(g => g.Votes).FirstOrDefault(g => g.CreatorName == name && g.IsInProgress);
             if (game == null) throw new Exception();
             var votes = game.Votes.Where(v=>v.Move == game.Moves).ToList();
-            if (!votes.Any()) return new FinishVoteModel(){result = ""};
-            var groupedVotes = votes.GroupBy(v => new { v.From, v.To },
+            if (!votes.Any())
+            {
+                return new FinishVoteModel() { result = "" };
+            }
+
+            // Если большинство проголосовали за сдачу, то возвращаем этот результат
+            var isGiveUp = votes.Count(v => v.GiveUp == true) > votes.Count(v => v.GiveUp == false);
+            if (isGiveUp)
+            {
+                return new FinishVoteModel() { isGiveUp = true };
+            }
+
+            // Если нет ни одного хода с движением фигур
+            if (!votes.Any(v=>v.From != "" && v.To != ""))
+            {
+                return new FinishVoteModel() { result = "" };
+            }
+
+            var isDraw = votes.Count(v => v.Draw == true) > votes.Count(v => v.Draw == false);
+            var groupedVotes = votes.Where(v => v.From != "" && v.To != "").GroupBy(v => new { v.From, v.To },
                 (move, moves) => new { count = moves.Count(), from = move.From, to = move.To }).ToList();
             var maxVotes = groupedVotes.Where(g => g.count == groupedVotes.Max(v => v.count)).ToList();
             if (maxVotes.Count > 1)
@@ -252,7 +270,7 @@ namespace ChessVote.Classes
             }
 
             var percent = (maxVotes[0].count / votes.Count) * 100;
-            return new FinishVoteModel() { result = percent + "%", from = maxVotes[0].from, to = maxVotes[0].to };
+            return new FinishVoteModel() { result = percent + "%", from = maxVotes[0].from, to = maxVotes[0].to, isDraw = isDraw, isGiveUp = isGiveUp };
         }
 
         public bool UndoVote(string name)
@@ -264,6 +282,29 @@ namespace ChessVote.Classes
             _db.Entry(vote).State = EntityState.Deleted;
             _db.SaveChanges();
             return true;
+        }
+
+        public bool? VoteGiveUp(string name, int move)
+        {
+            var user = _db.Users.Include(u => u.Game).Include(u => u.Votes).FirstOrDefault(u => u.Name == name);
+            if (user == null) return false;
+            if (user.GameId == null) return false;
+            var vote = user.Votes.FirstOrDefault(v => v.GameId == user.GameId && v.Move == move);
+            if (vote == null)
+            {
+                vote = new Vote();
+                vote.GameId = user.GameId.Value;
+                vote.Move = move;
+                vote.From = "";
+                vote.To = "";
+                vote.UserName = name;                
+                user.Votes.Add(vote);
+            }
+
+            vote.GiveUp = !vote.GiveUp;
+
+            _db.SaveChanges();
+            return vote.GiveUp;
         }
     }
 }

@@ -21,6 +21,7 @@
         /**
          * Получить последний отданный голос (после обновления страницы)
          */
-        restorevote: 'game/restorevote'
+        restorevote: 'game/restorevote',
+        voteGiveUp: 'game/votegiveup'
     }
 }
