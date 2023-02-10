@@ -7,5 +7,7 @@
         public string to { get; set; }
 
         public int moves { get; set; }
+
+        public bool giveup { get; set; }
     }
 }

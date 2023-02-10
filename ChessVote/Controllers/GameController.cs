@@ -99,6 +99,10 @@ namespace ChessVote.Controllers
             return StatusCode(500);
         }
 
+        /// <summary>
+        /// Возвращает голос
+        /// </summary>
+        /// <returns></returns>
         public ActionResult RestoreVote()
         {
             var userName = new UserHelper(HttpContext, _db).GetUser.Name;

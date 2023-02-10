@@ -214,7 +214,8 @@ namespace ChessVote.Classes
                 vote.Move = move;
                 user.Votes.Add(vote);
             }
-            
+
+            vote.GiveUp = false;
             vote.From = from;
             vote.To = to;
 
@@ -233,7 +234,8 @@ namespace ChessVote.Classes
                 {
                     from = v.From,
                     to = v.To,
-                    moves = v.Move
+                    moves = v.Move,
+                    giveup = v.GiveUp
                 }).FirstOrDefault();
         }
 
@@ -290,6 +292,7 @@ namespace ChessVote.Classes
             if (user == null) return false;
             if (user.GameId == null) return false;
             var vote = user.Votes.FirstOrDefault(v => v.GameId == user.GameId && v.Move == move);
+            // Если у нас есть голос, то убираем его и отмечаем что сдаемся
             if (vote == null)
             {
                 vote = new Vote();
@@ -297,14 +300,29 @@ namespace ChessVote.Classes
                 vote.Move = move;
                 vote.From = "";
                 vote.To = "";
-                vote.UserName = name;                
+                vote.UserName = name;
+                vote.GiveUp = true;
                 user.Votes.Add(vote);
+                _db.SaveChanges();
+                return true;
             }
 
-            vote.GiveUp = !vote.GiveUp;
+            if (vote.GiveUp== true)
+            {
+                user.Votes.Remove(vote); 
+                _db.SaveChanges(); 
+                return false;
+            }
 
-            _db.SaveChanges();
-            return vote.GiveUp;
+            if (vote.GiveUp == false)
+            {
+                vote.From = "";
+                vote.To = "";
+                vote.GiveUp = true;
+                _db.SaveChanges();
+                return true;
+            }
+            return false;
         }
     }
 }

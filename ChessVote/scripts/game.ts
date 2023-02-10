@@ -85,10 +85,15 @@ export class Game {
         send({
             method: "GET",
             url: environment.game.restorevote
-        }).then((data: { from: string, to: string, moves: number }) => {
+        }).then((data: { from: string, to: string, moves: number, giveup: boolean }) => {
             if (data == null) return;
             if (Game.movesLength != data.moves) return;
-            Game.game.move({ from: data.from, to: data.to });
+            if (data.from != '' && data.to != '') {
+                Game.game.move({ from: data.from, to: data.to });
+            }
+            if (data.giveup) {
+                document.querySelector('#game-slave .giveUpVote').classList.add('green');
+            }
             Board.setPosition(Game.game.fen());
             (document.querySelector(".cancelVote") as HTMLElement).style.display = '';
             Game.UpdateExtraButtons();
@@ -274,6 +279,7 @@ export class Game {
             () => {
                 (document.querySelector(".cancelVote") as HTMLElement).style.display = '';
                 Game.UpdateExtraButtons();
+                document.querySelector('#game-slave .giveUpVote').classList.remove('green');
             },
             () => {
                 toastr.warning("Произошла ошибка. Обновите страницу и попробуйте снова (код 4)");
