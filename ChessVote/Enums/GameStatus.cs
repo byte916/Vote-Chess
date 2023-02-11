@@ -1,13 +1,14 @@
 ﻿namespace ChessVote.Enums
 {
-    /// <summary> Состояние игрока </summary>
     public enum GameStatus: int
     {
-        /// <summary> Не подключен к действующей игре </summary>
-        None = 0,
-        /// <summary> Владелец игры </summary>
-        Owner = 1,
-        /// <summary> Присоединен к игре </summary>
-        Joined = 2
+        InProgress = 0,
+        WhiteWin = 1,
+        BlackWin = 2,
+        Draw = 3,
+        /// <summary>
+        /// Прекращена по решению создателя
+        /// </summary>
+        Aborted = 4
     }
 }

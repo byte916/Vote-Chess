@@ -4,7 +4,7 @@ namespace ChessVote.Model
 {
     public class StateModel
     {
-        public GameStatus State { get; set; }
+        public PlayerStatus State { get; set; }
         public string Color { get; set; }
     }
 }

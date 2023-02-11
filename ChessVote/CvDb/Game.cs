@@ -1,4 +1,6 @@
-﻿namespace ChessVote.CvDb
+﻿using ChessVote.Enums;
+
+namespace ChessVote.CvDb
 {
     public class Game
     {
@@ -10,8 +12,8 @@
 
         public User Creator { get; set; }
 
-        /// <summary> Игра в процессе </summary>
-        public bool IsInProgress { get; set; }
+        /// <summary> Состояние игры </summary>
+        public GameStatus State { get; set; }
 
         /// <summary> Список участников игры </summary>
         public List<User> Participants { get; set; }

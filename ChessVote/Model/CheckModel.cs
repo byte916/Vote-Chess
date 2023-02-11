@@ -5,7 +5,7 @@ namespace ChessVote.Model
     public class CheckModel
     {
         /// <summary> Состояние игры </summary>
-        public GameStatus status { get; set; }
+        public PlayerStatus status { get; set; }
 
         /// <summary> Количество сделанных ходов в игре </summary>
         public int moves { get; set; }

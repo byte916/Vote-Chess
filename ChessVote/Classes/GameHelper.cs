@@ -21,22 +21,22 @@ namespace ChessVote.Classes
         public StateModel GetState(string name)
         {
             var result = new StateModel();
-            var currentGame = _db.Games.FirstOrDefault(g => g.CreatorName == name && g.IsInProgress);
+            var currentGame = _db.Games.FirstOrDefault(g => g.CreatorName == name && g.State == GameStatus.InProgress);
             if (currentGame != null)
             {
-                result.State = GameStatus.Owner;
+                result.State = PlayerStatus.Owner;
                 result.Color = currentGame.Color;
                 return result;
             }
             var currentUser = _db.Users.Include(u=>u.Game).FirstOrDefault(u => u.Name == name);
-            if (currentUser != null && currentUser.GameId != null && currentUser.Game.IsInProgress)
+            if (currentUser != null && currentUser.GameId != null && currentUser.Game.State == GameStatus.InProgress)
             {
-                result.State = GameStatus.Joined;
+                result.State = PlayerStatus.Joined;
                 result.Color = currentUser.Game.Color;
                 return result;
             }
 
-            result.State = GameStatus.None;
+            result.State = PlayerStatus.None;
             return result;
         }
 
@@ -49,7 +49,7 @@ namespace ChessVote.Classes
 
             var currentGame = _db.Games.Include(g => g.Votes)
                 .Include(g => g.Participants)
-                .FirstOrDefault(g => g.CreatorName == name && g.IsInProgress);
+                .FirstOrDefault(g => g.CreatorName == name && g.State == GameStatus.InProgress);
 
 
             // Обновляем время последнего посещения
@@ -62,7 +62,7 @@ namespace ChessVote.Classes
 
             if (currentGame != null)
             {
-                result.status = GameStatus.Owner;
+                result.status = PlayerStatus.Owner;
                 result.moves = currentGame.Moves;
                 result.votes = currentGame.Votes.Where(v => v.Move == result.moves).Select(v=>v.UserName).ToList();
                 result.online = currentGame.Participants.Where(p => p.Online > DateTime.Now.AddSeconds(-5)).Select(p => p.Name).ToList();
@@ -74,19 +74,19 @@ namespace ChessVote.Classes
                     .Include(u => u.Game.Participants)
                     .FirstOrDefault(u => u.Name == name);
 
-                if (currentUser != null && currentUser.Game != null && currentUser.Game.IsInProgress)
+                if (currentUser != null && currentUser.Game != null && currentUser.Game.State == GameStatus.InProgress)
                 {
-                    result.status = GameStatus.Joined;
+                    result.status = PlayerStatus.Joined;
                     result.moves = currentUser.Game.Moves;
                     result.votes = currentUser.Game.Votes.Where(v => v.Move == result.moves).Select(v => v.UserName).ToList();
                     result.online = currentUser.Game.Participants.Where(g=>g.Online > DateTime.Now.AddSeconds(-5)).Select(p=>p.Name).ToList();
                 }
                 else
                 {
-                    result.status = GameStatus.None;
+                    result.status = PlayerStatus.None;
                 }
             }
-            if (result.status == GameStatus.None) return result;
+            if (result.status == PlayerStatus.None) return result;
 
             result.online.RemoveAll(o => result.votes.IndexOf(o) != -1);
 
@@ -95,12 +95,12 @@ namespace ChessVote.Classes
 
         public List<string> GetGameList()
         {
-            return _db.Games.Where(g => g.IsInProgress).Select(g => g.CreatorName).ToList();
+            return _db.Games.Where(g => g.State == GameStatus.InProgress).Select(g => g.CreatorName).ToList();
         }
 
         public void Create(string name, string color)
         {
-            var currentGame = _db.Games.FirstOrDefault(g => g.CreatorName == name && g.IsInProgress);
+            var currentGame = _db.Games.FirstOrDefault(g => g.CreatorName == name && g.State == GameStatus.InProgress);
             if (currentGame != null)
             {
                 return;
@@ -109,7 +109,7 @@ namespace ChessVote.Classes
             currentGame = new Game()
             {
                 CreatorName = name,
-                IsInProgress = true,
+                State = GameStatus.InProgress,
                 PGN = "start",
                 Color = color
             };
@@ -123,7 +123,7 @@ namespace ChessVote.Classes
         public JoinModel? Join(string targetUser,string currentUser )
         {
             var result = new JoinModel();
-            var game = _db.Games.Include(g=>g.Participants).FirstOrDefault(g => g.IsInProgress && g.CreatorName == targetUser);
+            var game = _db.Games.Include(g=>g.Participants).FirstOrDefault(g => g.State == GameStatus.InProgress && g.CreatorName == targetUser);
             if (game == null) return null;
             if (game.Participants.Any(p => p.Name == currentUser))
             {
@@ -163,7 +163,7 @@ namespace ChessVote.Classes
 
         public bool SavePgn(string username, string pgn, int moves)
         {
-            var game = _db.Games.FirstOrDefault(g => g.IsInProgress && g.CreatorName == username);
+            var game = _db.Games.FirstOrDefault(g => g.State == GameStatus.InProgress && g.CreatorName == username);
             if (game == null) return false;
             game.PGN = pgn;
             game.Moves = moves;
@@ -173,17 +173,17 @@ namespace ChessVote.Classes
         
         public string? GetPgn(string username)
         {
-            var game = _db.Games.FirstOrDefault(g => g.IsInProgress && g.CreatorName == username);
+            var game = _db.Games.FirstOrDefault(g => g.State == GameStatus.InProgress && g.CreatorName == username);
             if (game == null) game = _db.Users.Include(u => u.Game).FirstOrDefault(u => u.Name == username)?.Game;
             return game?.PGN;
         }
 
         public void Exit(string name)
         {
-            var currentGame = _db.Games.Include(g=>g.Participants).FirstOrDefault(g => g.CreatorName == name && g.IsInProgress);
+            var currentGame = _db.Games.Include(g=>g.Participants).FirstOrDefault(g => g.CreatorName == name && g.State == GameStatus.InProgress);
             if (currentGame != null)
             {
-                currentGame.IsInProgress = false;
+                currentGame.State = GameStatus.Aborted;
                 foreach (var currentGameParticipant in currentGame.Participants)
                 {
                     currentGameParticipant.GameId = null;
@@ -241,7 +241,7 @@ namespace ChessVote.Classes
 
         public FinishVoteModel FinishVote(string name)
         {
-            var game = _db.Games.Include(g => g.Votes).FirstOrDefault(g => g.CreatorName == name && g.IsInProgress);
+            var game = _db.Games.Include(g => g.Votes).FirstOrDefault(g => g.CreatorName == name && g.State == GameStatus.InProgress);
             if (game == null) throw new Exception();
             var votes = game.Votes.Where(v=>v.Move == game.Moves).ToList();
             if (!votes.Any())
