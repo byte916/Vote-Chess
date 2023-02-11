@@ -6,8 +6,8 @@ import * as toastr from 'toastr';
 import { VotedList } from './components/fillVotedList';
 import { historyResult, IChessJS } from './interfaces/chessjs';
 import { IChessboardJS } from './interfaces/chessboardjs';
+import { FinishGameDraw, FinishGameLose, FinishGameWin } from './finish-game-screen';
 declare var Chessboard: Function;
-declare var Fireworks;
 const Chess: IChessJS = require('chess.js');
 
 export class Game {
@@ -143,6 +143,21 @@ export class Game {
                 return;
             }
 
+            // Если игра закончилась нашей победой
+            if (data.game == 1 && Board.board.orientation() == 'white' || data.game == 2 && Board.board.orientation() =='black') {
+                FinishGameWin();
+                return;
+            }
+            // Если игра закончилась нашим поражением
+            if (data.game == 1 && Board.board.orientation() == 'black' || data.game == 2 && Board.board.orientation() == 'white') {
+                FinishGameLose();
+                return;
+            }
+            if (data.game == 3) {
+                FinishGameDraw();
+                return;
+            }
+
             // Если в игре изменилось количество ходов (мастер сделал ход), то получаем 
             if (Game.movesLength != data.moves) {
                 send({
@@ -165,91 +180,6 @@ export class Game {
 
             Game.getGameStateTimer = setTimeout(Game.getGameState, Game.checkStateInterval);
         });
-    }
-
-    public static FinishGame() {
-        Game.gameIsFinished = true;
-        const body = document.querySelector('body');
-        var wrapperBc = document.createElement('div');
-        wrapperBc.style.position = 'fixed';
-        wrapperBc.style.top = '0px';
-        wrapperBc.style.bottom = '0px';
-        wrapperBc.style.left = '0px';
-        wrapperBc.style.right = '0px';
-        wrapperBc.id = 'fireworks-wrapper-bc';
-        wrapperBc.style.backgroundColor = '#000';
-        wrapperBc.style.opacity = '0.5';
-        wrapperBc.style.overflow = 'hidden';
-        body.appendChild(wrapperBc);
-
-        var wrapper = document.createElement('div');
-        wrapper.style.position = 'fixed';
-        wrapper.style.top = '0';
-        wrapper.style.bottom = '0';
-        wrapper.style.left = '0';
-        wrapper.style.right = '0';
-        wrapper.id = 'fireworks-wrapper';
-        body.appendChild(wrapper);
-
-        var header = document.createElement('div');
-        header.style.marginTop = '300px';
-        header.style.position = 'fixed';
-        header.style.top = '0';
-        header.style.bottom = '0';
-        header.style.left = '0';
-        header.style.right = '0';
-        header.style.fontSize = '32px';
-        header.style.textAlign = 'center';
-        header.textContent = 'ПОБЕДА';
-        header.style.textShadow = '#BFB 0px 0px 10px ,#BBF 0px 0px 15px,#FBB 0px 0px 20px,#DFD 0px 0px 30px,#DDF 0px 0px 40px, #FDD 0px 0px 50px';
-        body.appendChild(header);
-        wrapperBc.addEventListener('click', () => {
-            wrapperBc.remove();
-            wrapper.remove();
-            header.remove();
-            Game.exit();
-            SwitchScreen.toMain();
-
-            send({
-                method: "GET",
-                url: environment.game.exit
-            }).then(() => {
-                GameList.runUpdate();
-            });
-        });
-        header.addEventListener('click', () => {
-            wrapperBc.remove();
-            wrapper.remove();
-            header.remove();
-            Game.exit();
-            SwitchScreen.toMain();
-
-            send({
-                method: "GET",
-                url: environment.game.exit
-            }).then(() => {
-                GameList.runUpdate();
-            });
-        });
-        wrapper.addEventListener('click', () => {
-            wrapperBc.remove();
-            wrapper.remove();
-            header.remove();
-            Game.exit();
-            SwitchScreen.toMain();
-
-            send({
-                method: "GET",
-                url: environment.game.exit
-            }).then(() => {
-                GameList.runUpdate();
-            });
-        });
-        const fireworks = new Fireworks.default(wrapper, {
-            opacity: 0.1,
-            particles: 120
-        });
-        fireworks.start();
     }
 
     /**Сохранить PGN */
@@ -454,9 +384,12 @@ export class Board {
 /**Состояние игры */
 class GameCheck {
     /**
-     * Статус игры
+     * Статус игрока
      */
     public status: number;
+
+    /** Статус игры. 0 - игра идёт, 1 - победа белых, 2 - победа черных, 3 - ничья, 4 - игра закончилась */
+    public game: number;
     /**
      * Количество сделанных ходов
      */

@@ -4,8 +4,11 @@ namespace ChessVote.Model
 {
     public class CheckModel
     {
-        /// <summary> Состояние игры </summary>
+        /// <summary> Состояние игрока </summary>
         public PlayerStatus status { get; set; }
+
+        /// <summary> Состояние игры </summary>
+        public GameStatus game { get; set; }
 
         /// <summary> Количество сделанных ходов в игре </summary>
         public int moves { get; set; }

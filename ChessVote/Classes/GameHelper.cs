@@ -51,7 +51,6 @@ namespace ChessVote.Classes
                 .Include(g => g.Participants)
                 .FirstOrDefault(g => g.CreatorName == name && g.State == GameStatus.InProgress);
 
-
             // Обновляем время последнего посещения
             var user = _db.Users.FirstOrDefault(u => u.Name == name);
             if (user != null)
@@ -74,9 +73,10 @@ namespace ChessVote.Classes
                     .Include(u => u.Game.Participants)
                     .FirstOrDefault(u => u.Name == name);
 
-                if (currentUser != null && currentUser.Game != null && currentUser.Game.State == GameStatus.InProgress)
+                if (currentUser != null && currentUser.Game != null && currentUser.Game.State != GameStatus.Aborted)
                 {
                     result.status = PlayerStatus.Joined;
+                    result.game = currentUser.Game.State;
                     result.moves = currentUser.Game.Moves;
                     result.votes = currentUser.Game.Votes.Where(v => v.Move == result.moves).Select(v => v.UserName).ToList();
                     result.online = currentUser.Game.Participants.Where(g=>g.Online > DateTime.Now.AddSeconds(-5)).Select(p=>p.Name).ToList();
@@ -239,6 +239,12 @@ namespace ChessVote.Classes
                 }).FirstOrDefault();
         }
 
+        /// <summary>
+        /// Закончить голосование
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public FinishVoteModel FinishVote(string name)
         {
             var game = _db.Games.Include(g => g.Votes).FirstOrDefault(g => g.CreatorName == name && g.State == GameStatus.InProgress);
@@ -253,6 +259,8 @@ namespace ChessVote.Classes
             var isGiveUp = votes.Count(v => v.GiveUp == true) > votes.Count(v => v.GiveUp == false);
             if (isGiveUp)
             {
+                game.State = game.Color == "white" ? GameStatus.WhiteWin : GameStatus.BlackWin;
+                _db.SaveChanges();
                 return new FinishVoteModel() { isGiveUp = true };
             }
 

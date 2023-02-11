@@ -3,6 +3,7 @@ import { GameList } from './game-list'
 import { Game, Board } from './game';
 import { environment } from './environment';
 import * as toastr from "toastr"
+import { FinishGameWin } from './finish-game-screen';
 // Код последней ошибки 4
 /**Состояние игры после загрузки страницы */
 declare var state: number;
@@ -78,7 +79,7 @@ function onFinishVoteClick() {
         url: environment.game.finishvote
     }).then((data: { result: string, from: string, to: string, isDraw: boolean, isGiveUp: boolean }) => {
         if (data.isGiveUp == true) {
-            Game.FinishGame();
+            FinishGameWin();
             return;
         }
         if (data.result == '') {
