@@ -15,7 +15,7 @@ namespace ChessVote.Controllers
         /// <summary> Получить список игр </summary>
         public JsonResult Get()
         {
-            return new JsonResult(new GameHelper(_db).GetGameList());
+            return new JsonResult(new GameHelper(HttpContext, _db).GetGameList());
         }
     }
 }

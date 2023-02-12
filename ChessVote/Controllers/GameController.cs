@@ -15,8 +15,7 @@ namespace ChessVote.Controllers
         
         public ActionResult Create(string color)
         {
-            var userName = new UserHelper(HttpContext, _db).GetUser.Name;
-            new GameHelper(_db).Create(userName, color);
+            new GameHelper(HttpContext, _db).Create(color);
             return new StatusCodeResult(200);
         }
 
@@ -24,14 +23,12 @@ namespace ChessVote.Controllers
         /// <returns></returns>
         public JsonResult Check()
         {
-            var userName = new UserHelper(HttpContext, _db).GetUser.Name;
-            return new JsonResult(new GameHelper(_db).CheckGame(userName));
+            return new JsonResult(new GameHelper(HttpContext, _db).CheckGame());
         }
 
         public ActionResult Join(string id)
         {
-            var userName = new UserHelper(HttpContext, _db).GetUser.Name;
-            var pgn = new GameHelper(_db).Join(id, userName);
+            var pgn = new GameHelper(HttpContext, _db).Join(id);
             if (pgn == null)
             {
                 return new StatusCodeResult(500);
@@ -42,8 +39,7 @@ namespace ChessVote.Controllers
 
         public ActionResult ReJoin()
         {
-            var userName = new UserHelper(HttpContext, _db).GetUser.Name;
-            var pgn = new GameHelper(_db).ReJoin(userName);
+            var pgn = new GameHelper(HttpContext, _db).ReJoin();
             if (pgn == null)
             {
                 return new StatusCodeResult(500);
@@ -54,16 +50,14 @@ namespace ChessVote.Controllers
 
         public ActionResult Exit()
         {
-            var userName = new UserHelper(HttpContext, _db).GetUser.Name;
-            new GameHelper(_db).Exit(userName);
+            new GameHelper(HttpContext, _db).Exit();
             return new StatusCodeResult(200);
         }
 
         public ActionResult SavePgn(string? pgn, int? moves)
         {
             pgn ??= "start";
-            var userName = new UserHelper(HttpContext, _db).GetUser.Name;
-            if (new GameHelper(_db).SavePgn(userName, pgn, moves.GetValueOrDefault(0))) return new StatusCodeResult(200);
+            if (new GameHelper(HttpContext, _db).SavePgn(pgn, moves.GetValueOrDefault(0))) return new StatusCodeResult(200);
             return new StatusCodeResult(500);
         }
 
@@ -73,8 +67,7 @@ namespace ChessVote.Controllers
         /// <returns></returns>
         public ActionResult GetPgn()
         {
-            var userName = new UserHelper(HttpContext, _db).GetUser.Name;
-            var pgn = new GameHelper(_db).GetPgn(userName);
+            var pgn = new GameHelper(HttpContext, _db).GetPgn();
             if (pgn == null)
             {
                 return new StatusCodeResult(500);
@@ -90,8 +83,7 @@ namespace ChessVote.Controllers
         /// <returns></returns>
         public ActionResult Vote(string from, string to, int moves)
         {
-            var userName = new UserHelper(HttpContext, _db).GetUser.Name;
-            if (new GameHelper(_db).Vote(userName, from, to, moves))
+            if (new GameHelper(HttpContext, _db).Vote(from, to, moves))
             {
                 return StatusCode(200);
             }
@@ -105,23 +97,20 @@ namespace ChessVote.Controllers
         /// <returns></returns>
         public ActionResult RestoreVote()
         {
-            var userName = new UserHelper(HttpContext, _db).GetUser.Name;
-            var result = new GameHelper(_db).RestoreVote(userName);
+            var result = new GameHelper(HttpContext, _db).RestoreVote();
             return new JsonResult(result);
         }
 
         public ActionResult FinishVote()
         {
-            var userName = new UserHelper(HttpContext, _db).GetUser.Name;
-            var result = new GameHelper(_db).FinishVote(userName);
+            var result = new GameHelper(HttpContext, _db).FinishVote();
 
             return new JsonResult(result);
         }
 
         public ActionResult UndoVote()
         {
-            var userName = new UserHelper(HttpContext, _db).GetUser.Name;
-            var result = new GameHelper(_db).UndoVote(userName);
+            var result = new GameHelper(HttpContext, _db).UndoVote();
             if (result) return Ok();
             return StatusCode(500);
         }
@@ -133,10 +122,8 @@ namespace ChessVote.Controllers
         /// <returns></returns>
         public ActionResult VoteGiveUp(int moves)
         {
-            var userName = new UserHelper(HttpContext, _db).GetUser.Name;
-            var result = new GameHelper(_db).VoteGiveUp(userName, moves);
-            if (result != null) return Ok(result);
-            return StatusCode(500);
+            var result = new GameHelper(HttpContext, _db).VoteGiveUp(moves);
+            return Ok(result);
         }
 
         /// <summary>
@@ -145,10 +132,8 @@ namespace ChessVote.Controllers
         /// <returns></returns>
         public ActionResult GiveUp()
         {
-            var userName = new UserHelper(HttpContext, _db).GetUser.Name;
-            var result = new GameHelper(_db).GiveUp(userName);
-            if (result != null) return Ok(result);
-            return StatusCode(500);
+            var result = new GameHelper(HttpContext, _db).GiveUp();
+            return Ok(result);
         }
     }
 }

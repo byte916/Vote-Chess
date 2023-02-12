@@ -8,9 +8,28 @@ namespace ChessVote.Classes
     public class GameHelper
     {
         private CvDbContext _db;
-        public GameHelper(CvDbContext context)
+
+        private HttpContext _httpContext;
+
+        private string _userName;
+
+        public GameHelper(HttpContext httpContext, CvDbContext dbContext)
         {
-            _db = context;
+            _db = dbContext;
+            _httpContext = httpContext;
+        }
+
+        /// <summary>
+        /// Получить имя текущего игрока
+        /// </summary>
+        /// <returns></returns>
+        private string UserName()
+        {
+            if (_userName== null)
+            {
+                _userName = new UserHelper(_httpContext, _db).GetUser.Name;
+            }
+            return _userName;
         }
 
         /// <summary>
@@ -18,8 +37,9 @@ namespace ChessVote.Classes
         /// </summary>
         /// <param name="name">Имя текущего пользователя</param>
         /// <returns></returns>
-        public StateModel GetState(string name)
+        public StateModel GetState()
         {
+            var name = UserName();
             var result = new StateModel();
             var currentGame = _db.Games.FirstOrDefault(g => g.CreatorName == name && g.State == GameStatus.InProgress);
             if (currentGame != null)
@@ -43,8 +63,9 @@ namespace ChessVote.Classes
         /// <summary> Получить информацию об игре </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public CheckModel CheckGame(string name)
+        public CheckModel CheckGame()
         {
+            var name = UserName();
             var result = new CheckModel();
 
             var currentGame = _db.Games.Include(g => g.Votes)
@@ -98,8 +119,9 @@ namespace ChessVote.Classes
             return _db.Games.Where(g => g.State == GameStatus.InProgress).Select(g => g.CreatorName).ToList();
         }
 
-        public void Create(string name, string color)
+        public void Create(string color)
         {
+            var name = UserName();
             var currentGame = _db.Games.FirstOrDefault(g => g.CreatorName == name && g.State == GameStatus.InProgress);
             if (currentGame != null)
             {
@@ -120,8 +142,9 @@ namespace ChessVote.Classes
         /// <summary> Присоединиться к игре </summary>
         /// <param name="targetUser">Имя пользователя, к которому необходимо подключиться</param>
         /// <param name="currentUser">Имя текущего пользователя</param>
-        public JoinModel? Join(string targetUser,string currentUser )
+        public JoinModel? Join(string targetUser)
         {
+            var currentUser = UserName();
             var result = new JoinModel();
             var game = _db.Games.Include(g=>g.Participants).FirstOrDefault(g => g.State == GameStatus.InProgress && g.CreatorName == targetUser);
             if (game == null) return null;
@@ -150,8 +173,9 @@ namespace ChessVote.Classes
         /// <summary> Подключиться PGN игры, к которой присоединён игрок (после перезагрузки страницы, например) </summary>
         /// <param name="currentUser"></param>
         /// <returns></returns>
-        public JoinModel? ReJoin(string currentUser)
+        public JoinModel? ReJoin()
         {
+            var currentUser = UserName();
             var game = _db.Users.Include(u=>u.Game).FirstOrDefault(u=>u.Name == currentUser)?.Game;
             if (game == null) return null;
             return new JoinModel()
@@ -161,8 +185,9 @@ namespace ChessVote.Classes
             };
         }
 
-        public bool SavePgn(string username, string pgn, int moves)
+        public bool SavePgn(string pgn, int moves)
         {
+            var username = UserName();
             var game = _db.Games.FirstOrDefault(g => g.State == GameStatus.InProgress && g.CreatorName == username);
             if (game == null) return false;
             game.PGN = pgn;
@@ -171,15 +196,17 @@ namespace ChessVote.Classes
             return true;
         }
         
-        public string? GetPgn(string username)
+        public string? GetPgn()
         {
+            var username = UserName();
             var game = _db.Games.FirstOrDefault(g => g.State == GameStatus.InProgress && g.CreatorName == username);
             if (game == null) game = _db.Users.Include(u => u.Game).FirstOrDefault(u => u.Name == username)?.Game;
             return game?.PGN;
         }
 
-        public void Exit(string name)
+        public void Exit()
         {
+            var name = UserName();
             var currentGame = _db.Games.Include(g=>g.Participants).FirstOrDefault(g => g.CreatorName == name && g.State == GameStatus.InProgress);
             if (currentGame != null)
             {
@@ -200,8 +227,9 @@ namespace ChessVote.Classes
             _db.SaveChanges();
         }
 
-        public bool Vote(string name, string from, string to, int move)
+        public bool Vote(string from, string to, int move)
         {
+            var name = UserName();
             var user = _db.Users.Include(u => u.Game).Include(u => u.Votes).FirstOrDefault(u=>u.Name == name);
             if (user == null) return false;
             if (user.GameId == null) return false;
@@ -223,8 +251,9 @@ namespace ChessVote.Classes
             return true;
         }
 
-        public RestoreVoteModel? RestoreVote(string name)
+        public RestoreVoteModel? RestoreVote()
         {
+            var name = UserName();
             var user = _db.Users.Include(u => u.Game).Include(u => u.Votes).FirstOrDefault(u => u.Name == name);
             if (user == null) return null;
             if (user.GameId == null) return null;
@@ -245,8 +274,9 @@ namespace ChessVote.Classes
         /// <param name="name"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public FinishVoteModel FinishVote(string name)
+        public FinishVoteModel FinishVote()
         {
+            var name = UserName();
             var game = _db.Games.Include(g => g.Votes).FirstOrDefault(g => g.CreatorName == name && g.State == GameStatus.InProgress);
             if (game == null) throw new Exception();
             var votes = game.Votes.Where(v=>v.Move == game.Moves).ToList();
@@ -283,8 +313,9 @@ namespace ChessVote.Classes
             return new FinishVoteModel() { result = percent + "%", from = maxVotes[0].from, to = maxVotes[0].to, isDraw = isDraw, isGiveUp = isGiveUp };
         }
 
-        public bool UndoVote(string name)
+        public bool UndoVote()
         {
+            var name = UserName();
             var user = _db.Users.Include(u => u.Game).Include(u => u.Votes).FirstOrDefault(u => u.Name == name);
             if (user == null) return false;
             var vote = user.Votes.FirstOrDefault(v => v.GameId == user.GameId && v.Move == user.Game.Moves);
@@ -294,8 +325,9 @@ namespace ChessVote.Classes
             return true;
         }
 
-        public bool? VoteGiveUp(string name, int move)
+        public bool VoteGiveUp(int move)
         {
+            var name = UserName();
             var user = _db.Users.Include(u => u.Game).Include(u => u.Votes).FirstOrDefault(u => u.Name == name);
             if (user == null) return false;
             if (user.GameId == null) return false;
@@ -333,8 +365,9 @@ namespace ChessVote.Classes
             return false;
         }
 
-        public bool GiveUp(string name)
+        public bool GiveUp()
         {
+            var name = UserName();
             var game = _db.Games.FirstOrDefault(g => g.CreatorName == name && g.State == GameStatus.InProgress);
             if (game == null) return false;
             game.State = game.Color == "white" ? GameStatus.BlackWin : GameStatus.WhiteWin;
