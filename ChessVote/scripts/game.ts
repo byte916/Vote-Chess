@@ -65,9 +65,12 @@ export class Game {
     }
 
     /**Присоединиться к игре */
-    public static join(pgn: string, color: string) {
+    public static join(pgn: string, color: string, creatorOfferedDraw: boolean) {
         if (Game.isGameRunning) return;
         Game.resetState();
+        if (creatorOfferedDraw) {
+            document.querySelector('#game-slave .drawVote').classList.add('yellow');
+        }
         Game.isGameRunning = true;
         Game.getGameState();
 
@@ -85,7 +88,7 @@ export class Game {
         send({
             method: "GET",
             url: environment.game.restorevote
-        }).then((data: { from: string, to: string, moves: number, giveup: boolean }) => {
+        }).then((data: { from: string, to: string, moves: number, giveup: boolean, draw: boolean }) => {
             if (data == null) return;
             if (Game.movesLength != data.moves) return;
             if (data.from != '' && data.to != '') {
@@ -93,6 +96,9 @@ export class Game {
             }
             if (data.giveup) {
                 document.querySelector('#game-slave .giveUpVote').classList.add('green');
+            }
+            if (data.draw) {
+                document.querySelector('#game-slave .drawVote').classList.add('green');
             }
             Board.setPosition(Game.game.fen());
             (document.querySelector(".cancelVote") as HTMLElement).style.display = '';
@@ -113,6 +119,10 @@ export class Game {
     /**При подключении сбрасываем состояние, которое могло быть изменено в прошлой игре */
     private static resetState() {
         document.querySelector('#game-slave .giveUpVote').classList.remove('green');
+        document.querySelector('#game-slave .drawVote').classList.remove('green');
+        document.querySelector('#game-master .drawVote').classList.remove('green');
+        document.querySelector('#game-master .drawVote').classList.remove('yellow');
+        (document.querySelector(".finishVote") as HTMLElement).style.display = 'none';
     }
 
     /**Получить состояние игры */
@@ -166,7 +176,7 @@ export class Game {
                 send({
                     method: "GET",
                     url: environment.game.getpgn
-                }).then((pgnData: { pgn: string }) => {
+                }).then((pgnData: { pgn: string, creatorOfferedDraw: boolean }) => {
                     Game.game = new Chess();
                     if (pgnData.pgn != 'start') {
                         Game.game.load_pgn(pgnData.pgn);
@@ -174,6 +184,12 @@ export class Game {
                     Board.setPosition(Game.game.fen());
                     Game.movesLength = data.moves;
                     (document.querySelector(".cancelVote") as HTMLElement).style.display = 'none';
+                    document.querySelector('#game-slave .giveUpVote').classList.remove('green');
+                    document.querySelector('#game-slave .drawVote').classList.remove('green');
+                    document.querySelector('#game-slave .drawVote').classList.remove('yellow');
+                    if (pgnData.creatorOfferedDraw == true) {
+                        document.querySelector('#game-slave .drawVote').classList.add('yellow');
+                    }
                     Game.UpdateExtraButtons();
 
                     Game.getGameStateTimer = setTimeout(Game.getGameState, Game.checkStateInterval);
@@ -200,7 +216,11 @@ export class Game {
         Board.makeCellsHighlighted();
         if (Game.isMaster) {
             Game.SavePgn();
+            // Сбрасываем состояние ничьей предложенной голосующими
+            send({ method: 'GET', url: environment.game.resetDraw });
             (document.querySelector(".finishVote") as HTMLElement).style.display = '';
+            document.querySelector('#game-master .drawVote').classList.remove('green');
+            document.querySelector('#game-master .drawVote').classList.remove('yellow');
             Game.UpdateExtraButtons();
             return;
         }
@@ -262,6 +282,8 @@ export class Game {
         Game.game.move({ from: from, to: to });
         Board.setPosition(Game.game.fen());
         Game.SavePgn();
+        // Запускаем получение информации о игре
+        Game.getGameState();
         (document.querySelector(".finishVote") as HTMLElement).style.display = 'none';
     }
 
@@ -290,6 +312,10 @@ export class Game {
     /**Предложение ничьи от создателя игры*/
     public static Draw() {
         send({ method: 'GET', url: environment.game.offerDraw }).then((result: boolean) => {
+            if (result == true && document.querySelector('#game-master .drawVote').classList.contains('yellow')) {
+                FinishGameDraw();
+                return;
+            }
             if (result) {
                 document.querySelector('#game-master .drawVote').classList.add('green');
             } else {
@@ -300,7 +326,7 @@ export class Game {
 
     public static VoteDraw() {
         /**Если соперник уже предложил ничью, то сразу отправляем наше решение на сервер*/
-        send({ method: 'GET', url: environment.game.voteDraw + "?move=" + Game.movesLength }).then((result: boolean) => {
+        send({ method: 'GET', url: environment.game.voteDraw + "?move=" +Game.movesLength }).then((result: boolean) => {
             if (result) {
                 document.querySelector('#game-slave .drawVote').classList.add('green');
             } else {

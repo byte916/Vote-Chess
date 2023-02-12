@@ -9,5 +9,7 @@
         public int moves { get; set; }
 
         public bool giveup { get; set; }
+
+        public bool draw { get; set; }
     }
 }

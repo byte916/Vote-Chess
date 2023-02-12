@@ -67,13 +67,13 @@ namespace ChessVote.Controllers
         /// <returns></returns>
         public ActionResult GetPgn()
         {
-            var pgn = new GameHelper(HttpContext, _db).GetPgn();
-            if (pgn == null)
+            var data = new GameHelper(HttpContext, _db).GetPgn();
+            if (data == null)
             {
                 return new StatusCodeResult(500);
             }
 
-            return new JsonResult(new { pgn = pgn });
+            return new JsonResult(new { pgn = data.pgn, creatorOfferedDraw = data.creatorOfferedDraw });
         }
 
         /// <summary> Проголосовать за ход </summary>
@@ -146,6 +146,16 @@ namespace ChessVote.Controllers
         {
             var result = new GameHelper(HttpContext, _db).VoteDraw(move);
             return Ok(result);
+        }
+
+        /// <summary>
+        /// Сбросить состояние ничьей предложенной голосующими после хода мастера
+        /// </summary>
+        /// <returns></returns>
+        public ActionResult ResetDraw()
+        {
+            new GameHelper(HttpContext, _db).ResetDraw();
+            return Ok();
         }
     }
 }

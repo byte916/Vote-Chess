@@ -29,6 +29,8 @@
         /**Предложить ничью (создатель игры)*/
         offerDraw: 'game/offerDraw',
         /**Проголосовать за ничью*/
-        voteDraw: 'game/voteDraw'
+        voteDraw: 'game/voteDraw',
+        /**Сбросить состояние ничьей (после хода мастера)*/
+        resetDraw: 'game/resetDraw'
     }
 }

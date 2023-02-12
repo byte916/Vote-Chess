@@ -153,7 +153,8 @@ namespace ChessVote.Classes
                 result = new JoinModel()
                 {
                     pgn = game.PGN,
-                    color = game.Color == "black" ? "white" : "black"
+                    color = game.Color == "black" ? "white" : "black",
+                    creatorOfferedDraw = game.CreatorOfferedDraw,
                 };
                 return result;
             }
@@ -165,7 +166,8 @@ namespace ChessVote.Classes
             result = new JoinModel()
             {
                 pgn = game.PGN,
-                color = game.Color == "black" ? "white" : "black"
+                color = game.Color == "black" ? "white" : "black",
+                creatorOfferedDraw = game.CreatorOfferedDraw
             };
             return result;
         }
@@ -181,7 +183,8 @@ namespace ChessVote.Classes
             return new JoinModel()
             {
                 pgn = game.PGN,
-                color = game.Color == "black" ? "white" : "black"
+                color = game.Color == "black" ? "white" : "black",
+                creatorOfferedDraw = game.CreatorOfferedDraw
             };
         }
 
@@ -198,17 +201,21 @@ namespace ChessVote.Classes
             if (game == null) return false;
             game.PGN = pgn;
             game.Moves = moves;
-            game.VotersOfferedDraw = false;
             _db.SaveChanges();
             return true;
         }
         
-        public string? GetPgn()
+        public PgnModel? GetPgn()
         {
             var username = UserName();
             var game = _db.Games.FirstOrDefault(g => g.State == GameStatus.InProgress && g.CreatorName == username);
             if (game == null) game = _db.Users.Include(u => u.Game).FirstOrDefault(u => u.Name == username)?.Game;
-            return game?.PGN;
+            if (game == null) return null;
+            return new PgnModel
+            {
+                pgn = game.PGN,
+                creatorOfferedDraw = game.CreatorOfferedDraw
+            };
         }
 
         public void Exit()
@@ -271,7 +278,8 @@ namespace ChessVote.Classes
                     from = v.From,
                     to = v.To,
                     moves = v.Move,
-                    giveup = v.GiveUp
+                    giveup = v.GiveUp,
+                    draw = v.Draw
                 }).FirstOrDefault();
         }
 
@@ -421,10 +429,6 @@ namespace ChessVote.Classes
             if (game.VotersOfferedDraw == true)
             {
                 game.State = GameStatus.Draw;
-                foreach (var currentGameParticipant in game.Participants)
-                {
-                    currentGameParticipant.GameId = null;
-                }
                 _db.SaveChanges();
                 return true;
             }
@@ -454,6 +458,17 @@ namespace ChessVote.Classes
             vote.Draw = !vote.Draw;
             _db.SaveChanges();
             return vote.Draw;
+        }
+
+        public void ResetDraw()
+        {
+            var name = UserName();
+            var game = _db.Games
+                .Include(g => g.Participants)
+                .FirstOrDefault(g => g.CreatorName == name && g.State == GameStatus.InProgress);
+            if (game == null) return;
+            game.VotersOfferedDraw = false;
+            _db.SaveChanges();
         }
     }
 }

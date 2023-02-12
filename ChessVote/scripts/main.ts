@@ -77,6 +77,8 @@ function onCancelVoteClick() {
 
 /**Клик на кнопку "Завершить голосование */
 function onFinishVoteClick() {
+    // Приостанавливаем получение информации по игре
+    Game.exit();
     send({
         method: "GET",
         url: environment.game.finishvote
@@ -125,8 +127,8 @@ export function onJoinToGameClick(name: string) {
     send({
         method: "get",
         url: environment.game.join + "?id=" + name
-    }).then((data: { pgn: string, color: string }) => {
-        Game.join(data.pgn, data.color);
+    }).then((data: { pgn: string, color: string, creatorOfferedDraw: boolean }) => {
+        Game.join(data.pgn, data.color, data.creatorOfferedDraw);
     }, () => {
         toastr.warning("Произошла ошибка (код ошибки 1)");
     });
@@ -139,8 +141,8 @@ function onRejoinToGame() {
     send({
         method: "get",
         url: environment.game.rejoin
-    }).then((data: { pgn: string, color: string }) => {
-        Game.join(data.pgn, data.color);
+    }).then((data: { pgn: string, color: string, creatorOfferedDraw: boolean }) => {
+        Game.join(data.pgn, data.color, data.creatorOfferedDraw);
     }, () => {
         toastr.warning("Произошла ошибка (код ошибки 1)");
     });
