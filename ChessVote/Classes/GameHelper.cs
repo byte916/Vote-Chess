@@ -185,6 +185,12 @@ namespace ChessVote.Classes
             };
         }
 
+        /// <summary>
+        /// Сохранить PGN (после сделанного хода)
+        /// </summary>
+        /// <param name="pgn"></param>
+        /// <param name="moves"></param>
+        /// <returns></returns>
         public bool SavePgn(string pgn, int moves)
         {
             var username = UserName();
@@ -192,6 +198,7 @@ namespace ChessVote.Classes
             if (game == null) return false;
             game.PGN = pgn;
             game.Moves = moves;
+            game.VotersOfferedDraw = false;
             _db.SaveChanges();
             return true;
         }
@@ -294,19 +301,43 @@ namespace ChessVote.Classes
                 return new FinishVoteModel() { isGiveUp = true };
             }
 
+            var isDraw = votes.Count(v => v.Draw == true) > votes.Count(v => v.Draw == false);
+            // Если большинство проголосовали за ничью и в игре была предложена ничья, то завершаем игру ничьей
+            if (isDraw && game.CreatorOfferedDraw)
+            {
+                game.State = GameStatus.Draw;
+                foreach (var currentGameParticipant in game.Participants)
+                {
+                    currentGameParticipant.GameId = null;
+                }
+                _db.SaveChanges();
+                return new FinishVoteModel { isDraw= true };
+            }
+
             // Если нет ни одного хода с движением фигур
             if (!votes.Any(v=>v.From != "" && v.To != ""))
             {
                 return new FinishVoteModel() { result = "" };
             }
 
-            var isDraw = votes.Count(v => v.Draw == true) > votes.Count(v => v.Draw == false);
             var groupedVotes = votes.Where(v => v.From != "" && v.To != "").GroupBy(v => new { v.From, v.To },
                 (move, moves) => new { count = moves.Count(), from = move.From, to = move.To }).ToList();
             var maxVotes = groupedVotes.Where(g => g.count == groupedVotes.Max(v => v.count)).ToList();
             if (maxVotes.Count > 1)
             {
                 return new FinishVoteModel() { result = "" };
+            }
+            // Если голосованием предложена ничья а в игре не предложена, сохраняем
+            if (isDraw && !game.CreatorOfferedDraw)
+            {
+                game.VotersOfferedDraw = true;
+                _db.SaveChanges();
+            }
+            // Если была предложена ничья, но голосованием ничья не предложена, то стираем сохраненное состояние
+            if (!isDraw && game.CreatorOfferedDraw)
+            {
+                game.CreatorOfferedDraw = false;
+                _db.SaveChanges();
             }
 
             var percent = (maxVotes[0].count / votes.Count) * 100;
@@ -365,6 +396,10 @@ namespace ChessVote.Classes
             return false;
         }
 
+        /// <summary>
+        /// Сдаться (создатель игры
+        /// </summary>
+        /// <returns></returns>
         public bool GiveUp()
         {
             var name = UserName();
@@ -373,6 +408,55 @@ namespace ChessVote.Classes
             game.State = game.Color == "white" ? GameStatus.BlackWin : GameStatus.WhiteWin;
             _db.SaveChanges();
             return true;
+        }
+
+        /// <summary>
+        /// Предложить ничью (создатель игры)
+        /// </summary>
+        /// <returns>
+        /// </returns>
+        public bool OfferDraw()
+        {
+            var name = UserName();
+            var game = _db.Games
+                .Include(g => g.Participants)
+                .FirstOrDefault(g => g.CreatorName == name && g.State == GameStatus.InProgress);
+            if (game == null) return false;
+            if (game.VotersOfferedDraw == true)
+            {
+                game.State = GameStatus.Draw;
+                foreach (var currentGameParticipant in game.Participants)
+                {
+                    currentGameParticipant.GameId = null;
+                }
+                _db.SaveChanges();
+                return true;
+            }
+            game.CreatorOfferedDraw = !game.CreatorOfferedDraw;
+
+            return game.CreatorOfferedDraw;
+        }
+
+        public bool VoteDraw(int move)
+        {
+            var name = UserName();
+            var user = _db.Users.Include(u => u.Game).Include(u => u.Votes).FirstOrDefault(u => u.Name == name);
+            if (user == null) return false;
+            if (user.GameId == null) return false;
+            var vote = user.Votes.FirstOrDefault(v => v.GameId == user.GameId && v.Move == move);
+            if (vote == null)
+            {
+                vote = new Vote();
+                vote.GameId = user.GameId.Value;
+                vote.Move = move;
+                vote.From = "";
+                vote.To = "";
+                vote.UserName = name;
+                user.Votes.Add(vote);
+            }
+            vote.Draw = !vote.Draw;
+            _db.SaveChanges();
+            return vote.Draw;
         }
     }
 }

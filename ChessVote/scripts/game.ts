@@ -30,7 +30,7 @@ export class Game {
 
     /** Является ли текущий ход моим */
     public static isMyTurn = false;
-    
+        
     /**Создать игру */
     public static start(color: string) {
         if (Game.isGameRunning) return;
@@ -137,6 +137,13 @@ export class Game {
             if (Game.isMaster && data.votes != null && data.votes.length > 0) {
                 (document.querySelector(".finishVote") as HTMLElement).style.display = '';
             }
+
+            // Если игра закончилась ничьей, заканчиваем её
+            if (data.game == 3) {
+                FinishGameDraw();
+                return;
+            }
+
             // Если это мастер, то выходим здесь предварительно установив таймер для слеудющего получения состояния игры
             if (Game.isMaster) {
                 Game.getGameStateTimer = setTimeout(Game.getGameState, Game.checkStateInterval);
@@ -151,10 +158,6 @@ export class Game {
             // Если игра закончилась нашим поражением
             if (data.game == 1 && Board.board.orientation() == 'black' || data.game == 2 && Board.board.orientation() == 'white') {
                 FinishGameLose();
-                return;
-            }
-            if (data.game == 3) {
-                FinishGameDraw();
                 return;
             }
 
@@ -282,6 +285,28 @@ export class Game {
                     document.querySelector('#game-slave .giveUpVote').classList.remove('green');
                 }
             })
+    }
+
+    /**Предложение ничьи от создателя игры*/
+    public static Draw() {
+        send({ method: 'GET', url: environment.game.offerDraw }).then((result: boolean) => {
+            if (result) {
+                document.querySelector('#game-master .drawVote').classList.add('green');
+            } else {
+                document.querySelector('#game-master .drawVote').classList.remove('green');
+            }
+        })
+    }
+
+    public static VoteDraw() {
+        /**Если соперник уже предложил ничью, то сразу отправляем наше решение на сервер*/
+        send({ method: 'GET', url: environment.game.voteDraw + "?move=" + Game.movesLength }).then((result: boolean) => {
+            if (result) {
+                document.querySelector('#game-slave .drawVote').classList.add('green');
+            } else {
+                document.querySelector('#game-slave .drawVote').classList.remove('green');
+            }
+        })
     }
 }
 

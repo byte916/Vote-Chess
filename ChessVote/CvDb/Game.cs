@@ -17,7 +17,7 @@ namespace ChessVote.CvDb
 
         /// <summary> Список участников игры </summary>
         public List<User> Participants { get; set; }
-        
+
         /// <summary> PGN игры </summary>
         public string PGN { get; set; }
 
@@ -29,5 +29,11 @@ namespace ChessVote.CvDb
 
         /// <summary> Цвет создателя </summary>
         public string Color { get; set; }
+
+        /// <summary> Предложена ничья создателем </summary>
+        public bool CreatorOfferedDraw { get; set; }
+
+        /// <summary> Предложена ничья голосующими </summary>
+        public bool VotersOfferedDraw { get; set; }
     }
 }

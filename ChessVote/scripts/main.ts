@@ -42,7 +42,10 @@ documentReady(() => {
     // Клик на кнопку Сдаться
     document.querySelectorAll(".giveUpVote").forEach(element => {
         element.addEventListener('click', onGiveUpClick);
-    })
+    });
+
+    document.querySelector('#game-master .drawVote').addEventListener('click', onDrawClick);
+    document.querySelector('#game-slave .drawVote').addEventListener('click', onDrawVoteClick);
 });
 
 
@@ -85,6 +88,9 @@ function onFinishVoteClick() {
         if (data.result == '') {
             toastr.warning("Несколько ходов набрали равное количество голосов. Нужны новые голоса или чтобы кто-то переголосовал.");
             return;
+        }
+        if (data.isDraw) {
+            document.querySelector('#game-master .drawVote').classList.add('yellow');
         }
         Game.FinishVote(data.from, data.to);
         toastr.success("За этот ход проголосовало " + data.result);
@@ -139,6 +145,14 @@ function onRejoinToGame() {
 /**Клик на кнопку Сдаться */
 function onGiveUpClick() {
     Game.VoteGiveUp();
+}
+
+function onDrawClick() {
+    Game.Draw();
+}
+
+function onDrawVoteClick() {
+    Game.VoteDraw();
 }
 
 

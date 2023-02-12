@@ -25,7 +25,10 @@
         /**Проголосовать за сдачу*/
         voteGiveUp: 'game/votegiveup',
         /**Сдаться (создатель игры)*/
-        giveUp: 'game/giveup'
-
+        giveUp: 'game/giveup',
+        /**Предложить ничью (создатель игры)*/
+        offerDraw: 'game/offerDraw',
+        /**Проголосовать за ничью*/
+        voteDraw: 'game/voteDraw'
     }
 }

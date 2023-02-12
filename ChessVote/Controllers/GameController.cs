@@ -135,5 +135,17 @@ namespace ChessVote.Controllers
             var result = new GameHelper(HttpContext, _db).GiveUp();
             return Ok(result);
         }
+
+        public ActionResult OfferDraw()
+        {
+            var result = new GameHelper(HttpContext, _db).OfferDraw();
+            return Ok(result);
+        }
+
+        public ActionResult VoteDraw(int move)
+        {
+            var result = new GameHelper(HttpContext, _db).VoteDraw(move);
+            return Ok(result);
+        }
     }
 }
