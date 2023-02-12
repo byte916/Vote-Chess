@@ -332,5 +332,14 @@ namespace ChessVote.Classes
             }
             return false;
         }
+
+        public bool GiveUp(string name)
+        {
+            var game = _db.Games.FirstOrDefault(g => g.CreatorName == name && g.State == GameStatus.InProgress);
+            if (game == null) return false;
+            game.State = game.Color == "white" ? GameStatus.BlackWin : GameStatus.WhiteWin;
+            _db.SaveChanges();
+            return true;
+        }
     }
 }

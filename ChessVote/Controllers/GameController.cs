@@ -126,10 +126,27 @@ namespace ChessVote.Controllers
             return StatusCode(500);
         }
 
+        /// <summary>
+        /// Проголосовать за сдачу
+        /// </summary>
+        /// <param name="moves"></param>
+        /// <returns></returns>
         public ActionResult VoteGiveUp(int moves)
         {
             var userName = new UserHelper(HttpContext, _db).GetUser.Name;
             var result = new GameHelper(_db).VoteGiveUp(userName, moves);
+            if (result != null) return Ok(result);
+            return StatusCode(500);
+        }
+
+        /// <summary>
+        /// Сдаться (создателю игры)
+        /// </summary>
+        /// <returns></returns>
+        public ActionResult GiveUp()
+        {
+            var userName = new UserHelper(HttpContext, _db).GetUser.Name;
+            var result = new GameHelper(_db).GiveUp(userName);
             if (result != null) return Ok(result);
             return StatusCode(500);
         }

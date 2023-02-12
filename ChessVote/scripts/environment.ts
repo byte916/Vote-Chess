@@ -22,6 +22,10 @@
          * Получить последний отданный голос (после обновления страницы)
          */
         restorevote: 'game/restorevote',
-        voteGiveUp: 'game/votegiveup'
+        /**Проголосовать за сдачу*/
+        voteGiveUp: 'game/votegiveup',
+        /**Сдаться (создатель игры)*/
+        giveUp: 'game/giveup'
+
     }
 }

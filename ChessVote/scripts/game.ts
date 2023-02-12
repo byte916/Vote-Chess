@@ -265,6 +265,13 @@ export class Game {
     public static VoteGiveUp() {
         // Мастер сразу завершает игру
         if (Game.isMaster) {
+            send({ method: 'GET', url: environment.game.giveUp })
+                .then((result: boolean) => {
+                    if (result) FinishGameLose();
+                    else {
+                        toastr.warning("Произошла ошибка. Обновите страницу и попробуйте снова (код 5)");
+                    }
+                })
             return;
         }
         send({ method: 'GET', url: environment.game.voteGiveUp + "?moves=" + Game.movesLength })
