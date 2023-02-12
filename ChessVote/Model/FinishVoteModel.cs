@@ -12,6 +12,11 @@
         public bool isDraw { get; set; }
 
         /// <summary>
+        /// Игра была завершена (при ничьей)
+        /// </summary>
+        public bool isFinished { get; set; }
+
+        /// <summary>
         /// Большинство проголосовали сдаться
         /// </summary>
         public bool isGiveUp { get; set; }

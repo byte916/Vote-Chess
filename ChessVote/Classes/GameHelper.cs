@@ -298,7 +298,7 @@ namespace ChessVote.Classes
             {
                 game.State = game.Color == "white" ? GameStatus.WhiteWin : GameStatus.BlackWin;
                 _db.SaveChanges();
-                return new FinishVoteModel() { isGiveUp = true };
+                return new FinishVoteModel() { isGiveUp = true, isFinished = true };
             }
 
             var isDraw = votes.Count(v => v.Draw == true) > votes.Count(v => v.Draw == false);
@@ -306,12 +306,8 @@ namespace ChessVote.Classes
             if (isDraw && game.CreatorOfferedDraw)
             {
                 game.State = GameStatus.Draw;
-                foreach (var currentGameParticipant in game.Participants)
-                {
-                    currentGameParticipant.GameId = null;
-                }
                 _db.SaveChanges();
-                return new FinishVoteModel { isDraw= true };
+                return new FinishVoteModel { isDraw = true, isFinished = true };
             }
 
             // Если нет ни одного хода с движением фигур
@@ -433,6 +429,7 @@ namespace ChessVote.Classes
                 return true;
             }
             game.CreatorOfferedDraw = !game.CreatorOfferedDraw;
+            _db.SaveChanges();
 
             return game.CreatorOfferedDraw;
         }
