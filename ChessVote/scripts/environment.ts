@@ -31,6 +31,8 @@
         /**Проголосовать за ничью*/
         voteDraw: 'game/voteDraw',
         /**Сбросить состояние ничьей (после хода мастера)*/
-        resetDraw: 'game/resetDraw'
+        resetDraw: 'game/resetDraw',
+        /**Объявить результат */
+        declareResult: 'game/declareResult'
     }
 }

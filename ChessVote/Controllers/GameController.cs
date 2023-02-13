@@ -157,5 +157,15 @@ namespace ChessVote.Controllers
             new GameHelper(HttpContext, _db).ResetDraw();
             return Ok();
         }
+
+        /// <summary>
+        /// Объявить результат игры
+        /// </summary>
+        /// <returns></returns>
+        public ActionResult DeclareResult(bool win, bool draw)
+        {
+            new GameHelper(HttpContext, _db).DeclareResult(win, draw);
+            return Ok();
+        }
     }
 }

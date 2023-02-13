@@ -83,6 +83,10 @@ function onFinishVoteClick() {
         method: "GET",
         url: environment.game.finishvote
     }).then((data: { result: string, from: string, to: string, isDraw: boolean, isGiveUp: boolean, isFinished: boolean }) => {
+        // Запускаем получение информации о игре
+        Game.isGameRunning = true;
+        Game.getGameState();
+
         if (data.isGiveUp == true) {
             FinishGameWin();
             return;

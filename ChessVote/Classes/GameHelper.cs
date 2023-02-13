@@ -464,10 +464,30 @@ namespace ChessVote.Classes
         {
             var name = UserName();
             var game = _db.Games
-                .Include(g => g.Participants)
                 .FirstOrDefault(g => g.CreatorName == name && g.State == GameStatus.InProgress);
             if (game == null) return;
             game.VotersOfferedDraw = false;
+            _db.SaveChanges();
+        }
+
+        public void DeclareResult(bool win, bool draw)
+        {
+            var name = UserName();
+            var game = _db.Games
+                .FirstOrDefault(g => g.CreatorName == name && g.State == GameStatus.InProgress);
+            if (game == null) return;
+            if (draw)
+            {
+                game.State = GameStatus.Draw;
+            }
+            if (win)
+            {
+                game.State = game.Color == "white" ? GameStatus.WhiteWin : GameStatus.BlackWin;
+            }
+            if (!draw && !win)
+            {
+                game.State = game.Color == "white" ? GameStatus.BlackWin : GameStatus.WhiteWin;
+            }
             _db.SaveChanges();
         }
     }

@@ -14,7 +14,7 @@ export class Game {
     private static getGameStateTimer = null;
 
     /** Является ли игрок в игре */
-    private static isGameRunning = false;
+    public static isGameRunning = false;
 
     // Как часть получать состояние игры (в мс)
     private static checkStateInterval = 300;
@@ -239,6 +239,24 @@ export class Game {
             });
     }
 
+    /**Обновить статус игры после хода*/
+    public static UpdateStatus() {
+        if (!Game.isMaster) return;
+        if (Game.game.in_checkmate() || Game.game.in_draw()) {
+            var isWin = Game.game.in_checkmate() &&
+                ((Game.game.turn() === 'w' && Board.board.orientation() != 'white') || (Game.game.turn() === 'b' && Board.board.orientation() != 'black'));
+            send({ method: 'POST', url: environment.game.declareResult + "?win=" + isWin + "&draw=" + Game.game.in_draw() }).then(() => {
+                if (Game.game.in_draw()) {
+                    FinishGameDraw();
+                } else if (isWin) {
+                    FinishGameWin();
+                } else {
+                    FinishGameLose();
+                }
+            })
+        }
+    }
+
     /**Обновить видимость дополнительных кнопок */
     public static UpdateExtraButtons() {
         if (Game.isMaster) {
@@ -282,9 +300,8 @@ export class Game {
         Game.game.move({ from: from, to: to });
         Board.setPosition(Game.game.fen());
         Game.SavePgn();
-        // Запускаем получение информации о игре
-        Game.getGameState();
         (document.querySelector(".finishVote") as HTMLElement).style.display = 'none';
+        setTimeout(Game.UpdateStatus, 1000);
     }
 
     public static VoteGiveUp() {
@@ -407,6 +424,7 @@ export class Board {
         // illegal move
         if (move === null) return 'snapback';
         Game.Move(source, target);
+        setTimeout(Game.UpdateStatus, 1000);
     }
 
     // update the board position after the piece snap
